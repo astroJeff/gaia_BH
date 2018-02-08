@@ -1,1 +1,5 @@
 docs/notes.txt
+docs/*.aux
+docs/*.log
+docs/*.gz
+docs/*.out
