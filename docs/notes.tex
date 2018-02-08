@@ -1,0 +1,107 @@
+\documentclass[12pt,preprint]{hackaastex}
+\usepackage{lscape, longtable, hyperref, graphicx, subfigure}
+\usepackage{amsmath,amsfonts,amssymb,epsfig,epstopdf,color,multirow}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{wrapfig}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+
+\newcommand{\Msun}{\ifmmode {M_{\odot}}\else${M_{\odot}}$\fi}
+\newcommand{\Rsun}{\ifmmode {R_{\odot}}\else${R_{\odot}}$\fi}
+\newcommand{\lapprox }{{\lower0.8ex\hbox{$\buildrel <\over\sim$}}}
+\newcommand{\gapprox }{{\lower0.8ex\hbox{$\buildrel >\over\sim$}}}
+
+\newcommand{\Porb}{\ifmmode {P_{\rm orb}}\else${P_{\rm orb}}$\fi}
+\newcommand{\RV}{\ifmmode {{\rm RV}}\else RV \fi}
+\newcommand{\bigG}{\ifmmode {\mathcal{G}}\else${\mathcal{G}}$\fi}
+
+\voffset=-0.2in
+\headheight=10pt
+\headsep=0.2in
+\textwidth=6.5in
+\textheight=9.0in
+\topmargin=-0.2in
+\footskip=20pt
+\oddsidemargin=0.0in
+\evensidemargin=0.0in
+
+
+
+
+\pagestyle{fancy}
+\fancyhf{}
+
+
+\shorttitle{}
+\shortauthors{}
+\bibliographystyle{apj}
+
+\begin{document}
+\begin{center}
+{\large \textbf{\sc Unseen companions to astrometric and spectroscopic binaries:}}
+%\rule{6.5in}{1pt}
+\end{center}
+\normalsize
+
+\vspace{-0.1in}
+\noindent {\sc \bf Some math}
+
+
+
+From binary star orbits, we have a relation between the orbital separation, $a$, the orbital period, \Porb, and the two stellar component masses, $M_1$ and $M_2$:
+\begin{equation}
+\left( \frac{2 \pi}{\Porb} \right)^2 = \frac{\mathcal{G} (M_1 + M_2) }{a^3}.
+\end{equation}
+
+For a binary with an eccentricity $e$, the separation of the two components as a function of the true anomaly, $f$, is:
+\begin{equation}
+r = \frac{1-e^2}{1+e \cos f} a.
+\end{equation} 
+If we want to split this separation into two separations corresponding to the distance of each component to the binary's center of mass, we multiply by a mass factor:
+\begin{eqnarray}
+r_1 &=& \frac{1-e^2}{1+e \cos f} \frac{M_2}{M_1+M_2} a \nonumber \\
+r_2 &=& \frac{1-e^2}{1+e \cos f} \frac{M_1}{M_1+M_2} a.
+\end{eqnarray}
+
+
+Under observation, all binaries suffer from perspective effects depending on the orientation of the binary relative to an observer. These are summarized by three angles: the inclination angle, $I$, the argument of periapse, $\omega$, and the longitude of the ascending node, $\Omega$. Dividing by the distance to the binary, $d$, provides an equation for the angular position of stellar component of a binary relative to its center of mass. Adding the center of mass coordinate gives an equation for the absolute angular position of a star in a binary as a function of $f$:
+\begin{eqnarray}
+\alpha_1 &=& \alpha + \frac{r_1}{d} \left[ \cos \Omega \cos (\omega+f) - \sin \Omega \sin(\omega+f) \cos I \right] \nonumber \\
+\delta_1 &=& \delta + \frac{r_1}{d} \left[ \sin \Omega \cos (\omega+f) + \cos \Omega \sin(\omega+f) \cos I \right].
+\end{eqnarray}
+An analogous equation expresses the position of the secondary star, or it can be expressed as a function of $(\alpha_1, \delta_1)$:
+\begin{eqnarray}
+\alpha_2 &=& -\frac{M_1}{M_2}(\alpha_1 - \alpha) \nonumber \\
+\delta_2 &=& -\frac{M_1}{M_2}(\delta_1 - \delta).
+\end{eqnarray}
+
+
+Velocity suffers from similar perspective effects as position. It can be shown that the radial velocity of a stellar component in a binary can be expressed as a function of $f$:
+\begin{equation}
+\RV_1 = \gamma + \frac{M_2}{M_1 + M_2} \frac{2\pi}{\Porb} a \frac{1}{\sqrt{1-e^2}} \left[ \cos(\omega + f) \sin I + e \cos \omega \sin I \right]. 
+\end{equation}
+Subtracting the minimum radial velocity from the maximum radial velocity and dividing by two yields $K$:
+\begin{equation}
+K = \frac{M_2}{(M_1 + M_2)^{2/3}} \left( \frac{\bigG 2 \pi}{\Porb}\right)^{1/3} \frac{1}{\sqrt{1-e^2}} \sin I.
+\end{equation}
+
+Therefore, for a known (observed) $K$, $e$, \Porb, and $I$, one obtains the function:
+\begin{equation}
+M_1 = \left( \frac{M_2}{C_0} \right)^{2/3} - M_2,
+\end{equation}
+where:
+\begin{equation}
+C_0 = \sqrt{1-e^2} \left( \frac{\Porb}{\bigG 2 \pi}\right)^{1/3} \frac{K}{\sin I}.
+\end{equation}
+
+Good orbital coverage with radial velocities can provide, \Porb, $K$, and $e$. $I$ can be determined separately if the absolute scale of the orbit can be observed with precise astrometry combined with a parallax distance.
+
+
+\clearpage
+
+
+%\setlength{\baselineskip}{1\baselineskip}
+%\bibliography{references}
+
+\end{document}
