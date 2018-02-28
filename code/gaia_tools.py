@@ -7,7 +7,7 @@ from pygaia.errors.astrometric import parallaxError as plxErr
 from pygaia.errors.utils import averageNumberOfTransits as N_transit_ave
 
 
-def get_single_obs_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
+def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
     """ A tool to determine the single observation astrometric precision. This is
     calculated in a bit of an ad hoc way. We call the overall parallax precision, then
     multiply by sqrt(N_obs), as this is the number that should have been used to determine
@@ -47,9 +47,13 @@ def get_single_obs_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
         print("You must provide a RA and Dec")
         return
 
+    if DIST is None:
+        print("You must provide a distance")
+        return
+
     # KMB: get ecliptic latitude from ra/dec using astropy
-    c = SkyCoord(ra=sys_ra*u.degree, dec=sys_dec*u.degree, frame='icrs')
-    ecl_lat = c.GeocentricTrueEcliptic.lat
+    coords = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')
+    ecl_lat = coords.heliocentrictrueecliptic.lat
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
@@ -57,71 +61,14 @@ def get_single_obs_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
     plx_err = plxErr(G=G, vmini=V_IC, beta=ecl_lat)*1.0e-6
 
     m = 1.2
-    g_pi = 1.47/np.sin(ecl_lat)
+    g_pi = 1.92
 
-    plx_err_single = np.sqrt(N_obs_ave) / (m * g_pi) * plx_err
-
-    return plx_err_single
-
-
-
-def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
-    """ A tool to determine the single observation astrometric precision. This is
-    calculated in a bit of an ad hoc way. We call the overall parallax precision, then
-    multiply by sqrt(N_obs), as this is the number that should have been used to determine
-    the parallax precision. NOTE: this uses the Gaia DPAC package: pyGaia
-
-    Inputs
-    ------
-    G or V : float (provide one of these)
-    Gaia G-band or Visual V-band magnitude of the star
-
-    V_IC : float
-    Color index of the stellar type
-
-    RA : float
-    Right ascension in degrees
-
-    Dec: float
-    Declination in degrees    
-     
-    Returns
-    -------
-    pos_err_single : float
-    position uncertainty in arcseconds for a single observation
-
-    """
-
-    if V_IC is None:
-        print("You must provide a color index in the form of V_IC.")
-        return
-
-    if G is None and V is None:
-        print("You must provide at least one color: G or V")
-        return
-
-    if RA is None and Dec in None:
-        print("You must provide a RA and Dec")
-        return
-
-    # KMB: get ecliptic latitude from ra/dec using astropy
-    c = SkyCoord(ra=sys_ra*u.degree, dec=sys_dec*u.degree, frame='icrs')
-    ecl_lat = c.GeocentricTrueEcliptic.lat
-
-    # KMB: compute average N_obs for given ecliptic latitude
-    N_obs_ave = N_transit_ave(ecl_lat)
-
-    pos_err = posErr(G=G, vmini=V_IC, beta=ecl_lat)*1.0e-6
-
-    m = 1.2
-    g_pi = 1.47/np.sin(ecl_lat)
-
-    pos_err_single = np.sqrt(N_obs_ave) / (m * g_pi) * pos_err
+    pos_err_single = np.sqrt(N_obs_ave) / (m * g_pi) * plx_err
 
     return pos_err_single
 
 
-def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
+def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
     """ A tool to determine the parallax uncertainty for a star
 
     Inputs
@@ -137,6 +84,9 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
 
     Dec: float
     Declination in degrees
+
+    DIST : float
+    Distance in parsecs
 
     Returns
     -------
@@ -155,10 +105,18 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
         return
 
     if G is None:  G = V - 0.0257 - 0.0924 * (V_IC) - 0.1623 * (V_IC)**2 + 0.0090 * (V_IC)**3
+ 
+    if RA is None and Dec is None:
+        print("You must provide an RA and Dec")
+        return
+
+    if DIST is None:
+        print("You must provide a distance")
+        return  
 
     # KMB: get ecliptic latitude from ra/dec using astropy
-    c = SkyCoord(ra=sys_ra*u.degree, dec=sys_dec*u.degree, frame='icrs')
-    ecl_lat = c.GeocentricTrueEcliptic.lat
+    c = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')
+    ecl_lat = c.HeliocentricTrueEcliptic.lat
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
@@ -168,7 +126,7 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
     return plx_err
 
 
-def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
+def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
     """ A tool to determine the parallax uncertainty for a star
 
     Inputs
@@ -182,8 +140,11 @@ def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
     RA : float
     Right ascension in degrees
 
-    Dec: float
+    Dec : float
     Declination in degrees
+
+    DIST : float
+    Distance in parsecs
 
     Returns
     -------
@@ -202,9 +163,17 @@ def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None):
 
     if G is None:  G = V - 0.0257 - 0.0924 * (V_IC) - 0.1623 * (V_IC)**2 + 0.0090 * (V_IC)**3
 
+    if RA is None and Dec is None:
+        print("You must provide a distance")
+        return
+
+    if DIST is None:
+        print("You must provide an RA and Dec")
+        return 
+
     # KMB: get ecliptic latitude from ra/dec using astropy
-    c = SkyCoord(ra=sys_ra*u.degree, dec=sys_dec*u.degree, frame='icrs')
-    ecl_lat = c.GeocentricTrueEcliptic.lat
+    c = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')
+    ecl_lat = c.heliocentrictrueecliptic.lat
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)

@@ -80,9 +80,9 @@ def run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=1000, nsteps=2000):
 
 def create_data_array(sys):
 
-    names = ["time","ecl_lat","N_obs","ra","dec","ra_err","dec_err","rv","rv_err","plx","plx_err"]
+    names = ["time","ra","dec","ra_err","dec_err","rv","rv_err","plx","plx_err"]
     obs_pos = np.recarray(c.N_samples, names=names,
-                          formats=['float64,float64,float64,float64,float64,float64,float64,float64,float64,float64,float64'])
+                          formats=['float64,float64,float64,float64,float64,float64,float64,float64,float64'])
 
     time = np.sort(uniform(c.time_max*c.secyer, size=c.N_samples))
 
@@ -95,30 +95,21 @@ def create_data_array(sys):
     ra, dec = orbit.get_ra_dec(p, time)
     rv = orbit.get_RV(p, time)
     
-    # KMB: get ecliptic latitude from ra/dec
-    c = SkyCoord(ra=sys_ra*u.degree, dec=sys_dec*u.degree, frame='icrs')
-    ecl_lat = c.GeocentricTrueEcliptic.lat
-
-    # KMB: compute average N_obs for given ecliptic latitude
-    N_obs_ave = N_transit_ave(ecl_lat)
-
     # Save data to array
     obs_pos['time'] = time  # in seconds
-    obs_pos['ecl_lat'] = ecl_lat # in degrees
-    obs_pos['N_obs'] = N_obs_Ave 
     obs_pos['ra'] = ra  # in degrees
     obs_pos['dec'] = dec  # in degrees
     obs_pos['rv'] = rv  # in km/s
 
-    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[10], vmini=0.75, RA=ra, Dec=dec) # in arcseconds
-    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[10], vmini=0.75, RA=ra, Dec=dec) # in arcseconds
+    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[10], V_IC=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
+    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[10], V_IC=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
     # obs_pos['ra_err'] = 5.34e-6 / 3600.0 # in deg
     # obs_pos['dec_err'] = 5.34e-6 / 3600.0 # in deg
     obs_pos['rv_err'] = 1.0  # in km/s
 
     # parallax
     obs_pos['plx'] = 1.0/(sys['dist']*1.0e3) # plx in arseconds
-    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], vmini=0.75, RA=ra, Dec=dec) # in arcseconds
+    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], vmini=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
     # obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], V_IC=0.75)*1.0e3  # We use the V_IC of a G2V star
 
     # Add uncertainties to measurements
@@ -206,7 +197,7 @@ def run_set():
 
         print("...running", i, "of", len(data), "binaries")
 
-        run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=2000, nsteps=5000)
+        run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=200, nsteps=500)
 
 
 run_set()
