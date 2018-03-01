@@ -2,6 +2,9 @@ import numpy as np
 from numpy.random import uniform
 import emcee
 from gatspy.periodic import LombScargleFast
+from scipy.interpolate import interp1d
+from pygaia.photometry import transformations
+from pygaia.errors import spectroscopic
 
 import prob
 import orbit
@@ -17,11 +20,37 @@ def load_data(filename):
              ("Lum2", "<f8"), ("Temp2", "<f8"), ("Rad2", "<f8"),
              ("Xgx", "<f8"), ("Ygx", "<f8"), ("Zgx", "<f8"), ("dist","<f8"),
              ("inc","<f8"), ("Omega","<f8"), ("omega","<f8"),
-             ("proj_sep","<f8"), ("G","<f8"), ("V_Ic","<f8")]
+             ("proj_sep","<f8"), ("G","<f8"), ("V_IC","<f8")]
 
     data = np.genfromtxt(filename, dtype=dtype, delimiter=',')
 
     return data
+
+
+
+def get_M2_RV_err(mass, G, V_IC):
+
+    # First, get a V magnitude
+    G_VC = transformations.gminvFromVmini(V_IC)
+    V = G - G_VC
+
+    # Adjust for masses below pyGaia limit
+    if mass < 0.67: return spectroscopic.vradErrorSkyAvg(V, 'K4V')
+    if mass > 17.5: return spectroscopic.vradErrorSkyAvg(V, 'B0V')
+
+    # Stellar masses from Carol & Ostlie
+    # To Do: Check these numbers
+    mass_grid = np.array([17.5, 5.9, 2.9, 2.0, 1.6, 1.05, 1.0, 0.79, 0.67])
+    str_grid = np.array(['B0V','B5V','A0V','A5V','F0V','G0V','G5V','K0V','K4V'])
+    rv_err_grid = np.array([])
+    for i, m in enumerate(mass_grid):
+        rv_err_tmp = spectroscopic.vradErrorSkyAvg(V, str_grid[i])
+        rv_err_grid = np.append(rv_err_grid, rv_err_tmp)
+
+    rv_err_interp = interp1d(mass_grid, rv_err_grid)
+
+    return rv_err_interp(mass)
+
 
 
 def get_truths(sys):
@@ -118,7 +147,8 @@ def create_data_array(sys):
                                           DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
     # obs_pos['ra_err'] = 5.34e-6 / 3600.0 # in deg
     # obs_pos['dec_err'] = 5.34e-6 / 3600.0 # in deg
-    obs_pos['rv_err'] = 1.0  # in km/s
+
+    obs_pos['rv_err'] = get_M2_RV_err(sys['M2'], sys['G'], sys['V_IC'])  # in km/s
 
     # parallax
     obs_pos['plx'] = 1.0/(sys['dist']*1.0e3) # plx in arseconds
