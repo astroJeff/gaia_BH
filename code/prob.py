@@ -1,6 +1,8 @@
 import numpy as np
 import orbit
 
+include_M2_photo = False
+
 
 def ln_likelihood_rv(p, obs_rv):
 
@@ -97,7 +99,9 @@ def ln_likelihood(p, obs_pos, M2_obs, M2_obs_err):
     ll = ll + ln_likelihood_rv(p, obs_pos)
     ll = ll + ln_likelihood_pos(p, obs_pos)
     ll = ll + ln_likelihood_plx(p, obs_pos)
-    ll = ll + ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err)
+
+    if include_M2_photo:
+        ll = ll + ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err)
 
     if np.any(np.isnan(ll) | np.isinf(ll)):
         return -np.inf

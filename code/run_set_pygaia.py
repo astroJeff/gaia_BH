@@ -15,6 +15,7 @@ from astropy.coordinates import SkyCoord
 import plotting
 
 
+
 def load_data(filename):
     dtype = [("M1","<f8"), ("M2","<f8"), ("ecc","<f8"), ("P_orb","<f8"),
              ("Lum2", "<f8"), ("Temp2", "<f8"), ("Rad2", "<f8"),
