@@ -11,7 +11,7 @@ def ln_likelihood_rv(p, obs_rv):
     # P( delta t_cool | M1_zams_t, M2_zams_t)
     rv_diff = rv_model - obs_rv["rv"]
 
-    ln_P_temp = -np.log(obs_rv["rv_err"] * np.sqrt(2.0*np.pi)) - rv_diff**2/(2.0*obs_rv["rv_err"]**2)
+    ln_P_temp = - rv_diff**2/(2.0*obs_rv["rv_err"]**2)
 
     return np.sum(ln_P_temp)
 
@@ -54,8 +54,8 @@ def ln_likelihood_pos(p, obs_pos):
     ra_diff = ra_out - obs_pos["ra"]
     dec_diff = dec_out - obs_pos["dec"]
 
-    ln_prob_ra = -np.log(obs_pos["ra_err"] * np.sqrt(2.0*np.pi)) - ra_diff**2/(2.0*obs_pos["ra_err"]**2)
-    ln_prob_dec = -np.log(obs_pos["dec_err"] * np.sqrt(2.0*np.pi)) - dec_diff**2/(2.0*obs_pos["dec_err"]**2)
+    ln_prob_ra = - ra_diff**2/(2.0*obs_pos["ra_err"]**2)
+    ln_prob_dec = - dec_diff**2/(2.0*obs_pos["dec_err"]**2)
 
 
     return np.sum(ln_prob_ra) + np.sum(ln_prob_dec)
@@ -67,39 +67,43 @@ def ln_likelihood_plx(p, obs_pos):
 
     # Only include first value here
     # Parallax in as, so distance in pc
-    return np.log(obs_pos['plx_err'][0] * np.sqrt(2.0*np.pi)) - (obs_pos['plx'][0]-1.0/distance)**2/(2.0*obs_pos['plx_err'][0]**2)
+    return - (obs_pos['plx'][0]-1.0/distance)**2/(2.0*obs_pos['plx_err'][0]**2)
 
 
+def ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err):
+
+    sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance = p
+
+    return - (M2_obs-M2)**2/(2.0*M2_obs_err**2)
 
 
 # The posterior function calls the likelihood and prior functions
-def ln_posterior(p, obs_pos):
+def ln_posterior(p, obs_pos, M2_obs, M2_obs_err):
 
 
     # Calculate prior on model first
     lp = ln_prior(p)
 
     # Calculate likelihood
-    ll = ln_likelihood(p, obs_pos)
+    ll = ln_likelihood(p, obs_pos, M2_obs, M2_obs_err)
 
     return lp + ll
 
 
 
-def ln_likelihood(p, obs_pos):
+def ln_likelihood(p, obs_pos, M2_obs, M2_obs_err):
 
     ll = 0.0
     ll = ll + ln_likelihood_rv(p, obs_pos)
     ll = ll + ln_likelihood_pos(p, obs_pos)
     ll = ll + ln_likelihood_plx(p, obs_pos)
+    ll = ll + ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err)
 
     if np.any(np.isnan(ll) | np.isinf(ll)):
         return -np.inf
 
-    if np.all(ll == 0.):
-        return -np.inf
+    return ll
 
-    return ll.sum()
 
 
 

@@ -13,7 +13,7 @@ import plotting
 
 
 def load_data(filename):
-    dtype = [("M1","<f8"), ("M2","<f8"), ("ecc","<f8"), ("P_orb","<f8"), 
+    dtype = [("M1","<f8"), ("M2","<f8"), ("ecc","<f8"), ("P_orb","<f8"),
              ("Lum2", "<f8"), ("Temp2", "<f8"), ("Rad2", "<f8"),
              ("Xgx", "<f8"), ("Ygx", "<f8"), ("Zgx", "<f8"), ("dist","<f8"),
              ("inc","<f8"), ("Omega","<f8"), ("omega","<f8"),
@@ -28,7 +28,7 @@ def get_truths(sys):
 
     coords = SkyCoord(x=sys['Xgx']*u.parsec, y=sys['Ygx']*u.parsec, z=sys['Zgx']*u.parsec,
                       frame='galactocentric')
-    
+
     sys_ra = coords.icrs.ra.deg
     sys_dec = coords.icrs.dec.deg
 
@@ -41,7 +41,7 @@ def get_truths(sys):
     M2 = sys['M2'] * c.Msun
     distance = sys['dist'] * 1.0e3
     tau = 1.0e4
-    gamma = 10.0    
+    gamma = 10.0
 
     truths = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance
 
@@ -53,6 +53,10 @@ def run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=1000, nsteps=2000):
     # create array from input system parameters
     obs_pos = create_data_array(sys)
 
+    # Set companion mass constraint
+    M2_obs_err = 0.5
+    M2_obs = np.random.normal(loc=sys['M2'], scale=M2_obs_err, size=1)
+
     # Calculate truths for the binary
     truths = get_truths(sys)
 
@@ -60,11 +64,13 @@ def run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=1000, nsteps=2000):
     p0 = initialize_sampler(truths, obs_pos, nwalkers=nwalkers, ntemps=ntemps)
 
     # Run the sampler
-    chains = run_emcee(p0, obs_pos, nburn=nburn, nsteps=nsteps)
+    chains = run_emcee(p0, obs_pos, M2_obs, M2_obs_err, nburn=nburn, nsteps=nsteps)
 
     # Save the chains
     file_out = "../data/binary_set/system_" + "%.i" % i + "_chains.npy"
     np.save(file_out, chains)
+
+
 
 
 
@@ -99,16 +105,16 @@ def create_data_array(sys):
     # Calculate orbit
     ra, dec = orbit.get_ra_dec(p, time)
     rv = orbit.get_RV(p, time)
-    
+
     # Save data to array
     obs_pos['time'] = time  # in seconds
     obs_pos['ra'] = ra  # in degrees
     obs_pos['dec'] = dec  # in degrees
     obs_pos['rv'] = rv  # in km/s
 
-    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
                                           DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
-    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
                                           DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
     # obs_pos['ra_err'] = 5.34e-6 / 3600.0 # in deg
     # obs_pos['dec_err'] = 5.34e-6 / 3600.0 # in deg
@@ -116,7 +122,7 @@ def create_data_array(sys):
 
     # parallax
     obs_pos['plx'] = 1.0/(sys['dist']*1.0e3) # plx in arseconds
-    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
                                           DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
     # obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], V_IC=0.75)*1.0e3  # We use the V_IC of a G2V star
 
@@ -147,7 +153,7 @@ def initialize_sampler(truths, obs_pos, nwalkers=100, ntemps=1):
     return p0
 
 
-def run_emcee(p0, obs_pos, nburn=1000, nsteps=2000, thin=10):
+def run_emcee(p0, obs_pos, M2_obs, M2_obs_err, nburn=1000, nsteps=2000, thin=10):
 
     if p0.ndim == 2:
         nwalkers, ndim = p0.shape
@@ -158,7 +164,7 @@ def run_emcee(p0, obs_pos, nburn=1000, nsteps=2000, thin=10):
 
     # Define sampler
     if ntemps == 1:
-        sampler = emcee.EnsembleSampler(nwalkers=nwalkers, dim=ndim, lnpostfn=prob.ln_posterior, args=(obs_pos,))
+        sampler = emcee.EnsembleSampler(nwalkers=nwalkers, dim=ndim, lnpostfn=prob.ln_posterior, args=(obs_pos, M2_obs, M2_obs_err))
     else:
         sampler = emcee.PTSampler(ntemps=ntemps, nwalkers=nwalkers, dim=ndim,
                                   logl=prob.ln_likelihood, logp=prob.ln_prior,
@@ -193,7 +199,7 @@ def run_emcee(p0, obs_pos, nburn=1000, nsteps=2000, thin=10):
 
 def run_set():
 
-    filename = "../data/GxExampleSorted.dat"
+    filename = "../data/GxExampleSorted_m2_short.dat"
 
     data = load_data(filename)
 
@@ -201,7 +207,7 @@ def run_set():
 
     for i, sys in enumerate(data):
 
-        if i != 2: continue
+        if i != 0: continue
 
         print("...running", i, "of", len(data), "binaries")
 
