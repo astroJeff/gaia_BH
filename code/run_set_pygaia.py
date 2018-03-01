@@ -13,9 +13,11 @@ import plotting
 
 
 def load_data(filename):
-    dtype = [("M1","<f8"), ("M2","<f8"), ("ecc","<f8"), ("P_orb","<f8"), ("sep","<f8"),
-         ("proj_sep","<f8"), ("dist","<f8"), ("inc","<f8"), ("Omega","<f8"),
-         ("omega","<f8"), ("G","<f8"), ("sigma","<f8")]
+    dtype = [("M1","<f8"), ("M2","<f8"), ("ecc","<f8"), ("P_orb","<f8"), 
+             ("Lum2", "<f8"), ("Temp2", "<f8"), ("Rad2", "<f8"),
+             ("Xgx", "<f8"), ("Ygx", "<f8"), ("Zgx", "<f8"), ("dist","<f8"),
+             ("inc","<f8"), ("Omega","<f8"), ("omega","<f8"),
+             ("proj_sep","<f8"), ("G","<f8"), ("V_Ic","<f8")]
 
     data = np.genfromtxt(filename, dtype=dtype, delimiter=',')
 
@@ -24,8 +26,11 @@ def load_data(filename):
 
 def get_truths(sys):
 
-    sys_ra = 100.0
-    sys_dec = 10.0
+    coords = SkyCoord(x=sys['Xgx']*u.parsec, y=sys['Ygx']*u.parsec, z=sys['Zgx']*u.parsec,
+                      frame='galactocentric')
+    
+    sys_ra = coords.icrs.ra.deg
+    sys_dec = coords.icrs.dec.deg
 
     I = sys['inc']
     Omega = sys['Omega']
@@ -101,15 +106,18 @@ def create_data_array(sys):
     obs_pos['dec'] = dec  # in degrees
     obs_pos['rv'] = rv  # in km/s
 
-    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[10], V_IC=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
-    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[10], V_IC=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
+    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
+    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
     # obs_pos['ra_err'] = 5.34e-6 / 3600.0 # in deg
     # obs_pos['dec_err'] = 5.34e-6 / 3600.0 # in deg
     obs_pos['rv_err'] = 1.0  # in km/s
 
     # parallax
     obs_pos['plx'] = 1.0/(sys['dist']*1.0e3) # plx in arseconds
-    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], vmini=0.75, RA=ra, Dec=dec, DIST=sys[6]) # in arcseconds
+    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec, 
+                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
     # obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], V_IC=0.75)*1.0e3  # We use the V_IC of a G2V star
 
     # Add uncertainties to measurements

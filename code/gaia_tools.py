@@ -7,7 +7,8 @@ from pygaia.errors.astrometric import parallaxError as plxErr
 from pygaia.errors.utils import averageNumberOfTransits as N_transit_ave
 
 
-def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
+def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None, 
+                           XGX=None, YGX=None, ZGX=None):
     """ A tool to determine the single observation astrometric precision. This is
     calculated in a bit of an ad hoc way. We call the overall parallax precision, then
     multiply by sqrt(N_obs), as this is the number that should have been used to determine
@@ -52,8 +53,9 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
         return
 
     # KMB: get ecliptic latitude from ra/dec using astropy
-    coords = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')
-    ecl_lat = coords.heliocentrictrueecliptic.lat
+    coords = SkyCoord(x=XGX*u.parsec, y=YGX*u.parsec, z=ZGX*u.parsec,
+                      frame='galactocentric')
+    ecl_lat = coords.heliocentrictrueecliptic.lat.deg
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
@@ -68,7 +70,9 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
     return pos_err_single
 
 
-def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
+def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None, 
+                           XGX=None, YGX=None, ZGX=None):
+
     """ A tool to determine the parallax uncertainty for a star
 
     Inputs
@@ -115,8 +119,9 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
         return  
 
     # KMB: get ecliptic latitude from ra/dec using astropy
-    c = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')
-    ecl_lat = c.HeliocentricTrueEcliptic.lat
+    coords = SkyCoord(x=XGX*u.parsec, y=YGX*u.parsec, z=ZGX*u.parsec,
+                      frame='galactocentric')
+    ecl_lat = coords.heliocentrictrueecliptic.lat.deg
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
