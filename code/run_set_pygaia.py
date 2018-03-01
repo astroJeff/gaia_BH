@@ -168,7 +168,7 @@ def run_emcee(p0, obs_pos, M2_obs, M2_obs_err, nburn=1000, nsteps=2000, thin=10)
     else:
         sampler = emcee.PTSampler(ntemps=ntemps, nwalkers=nwalkers, dim=ndim,
                                   logl=prob.ln_likelihood, logp=prob.ln_prior,
-                                  loglargs=(obs_pos,))
+                                  loglargs=(obs_pos, M2_obs, M2_obs_err))
 
 
     # Run emcee
