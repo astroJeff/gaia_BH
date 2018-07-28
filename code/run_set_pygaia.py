@@ -119,7 +119,7 @@ def run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=1000, nsteps=2000):
     plotting.plot_trace(chains_in, filename="../figures/binary_set/binary_" + "%.i" % i + "_trace.pdf")
 
 
-def create_data_array(sys):
+def create_data_array(sys, p=None, ra_err=None, dec_err=None, rv_err=None):
 
     names = ["time","ra","dec","ra_err","dec_err","rv","rv_err","plx","plx_err"]
     obs_pos = np.recarray(c.N_samples, names=names,
@@ -129,7 +129,7 @@ def create_data_array(sys):
 
 
     # save system parameters
-    p = get_truths(sys)
+    if p is None: p = get_truths(sys)
 
 
     # Calculate orbit
@@ -142,19 +142,33 @@ def create_data_array(sys):
     obs_pos['dec'] = dec  # in degrees
     obs_pos['rv'] = rv  # in km/s
 
-    obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
-                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
-    obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
-                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
+    # obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
+    #                                       DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
+    # obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
+    #                                       DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
+    if ra_err is None:
+        obs_pos['ra_err'] = gaia.get_single_obs_pos_err(G=sys['G'], V_IC=sys['V_IC'], RA=ra, Dec=dec,
+                                              DIST=sys['dist'], XGX=sys['Xgx'], YGX=sys['Ygx'], ZGX=sys['Zgx'])/3600.0 # in arcseconds
+    else:
+        obs_pos['ra_err'] = ra_err
+
+    if dec_err is None:
+        obs_pos['dec_err'] = gaia.get_single_obs_pos_err(G=sys['G'], V_IC=sys['V_IC'], RA=ra, Dec=dec,
+                                              DIST=sys['dist'], XGX=sys['Xgx'], YGX=sys['Ygx'], ZGX=sys['Zgx'])/3600.0 # in arcseconds
+    else:
+        obs_pos['dec_err'] = dec_err
     # obs_pos['ra_err'] = 5.34e-6 / 3600.0 # in deg
     # obs_pos['dec_err'] = 5.34e-6 / 3600.0 # in deg
 
-    obs_pos['rv_err'] = get_M2_RV_err(sys['M2'], sys['G'], sys['V_IC'])  # in km/s
+    if rv_err is None:
+        obs_pos['rv_err'] = get_M2_RV_err(sys['M2'], sys['G'], sys['V_IC'])  # in km/s
+    else:
+        obs_pos['rv_err'] = rv_err
 
     # parallax
-    obs_pos['plx'] = 1.0/(sys['dist']*1.0e3) # plx in arseconds
-    obs_pos['plx_err'] = gaia.get_plx_err(G=sys[15], V_IC=sys[16], RA=ra, Dec=dec,
-                                          DIST=sys[10], XGX=sys[7], YGX=sys[8], ZGX=sys[9]) # in arcseconds
+    obs_pos['plx'] = 1.0/(sys['dist']) # plx in arseconds
+    obs_pos['plx_err'] = gaia.get_plx_err(G=sys['G'], V_IC=sys['V_IC'], RA=ra, Dec=dec,
+                                          DIST=sys['dist'], XGX=sys['Xgx'], YGX=sys['Ygx'], ZGX=sys['Zgx']) # in arcseconds
     # obs_pos['plx_err'] = gaia.get_plx_err(G=sys[10], V_IC=0.75)*1.0e3  # We use the V_IC of a G2V star
 
     # Add uncertainties to measurements
@@ -245,4 +259,4 @@ def run_set():
         run_one_binary(i, sys, nwalkers=100, ntemps=1, nburn=200, nsteps=500)
 
 
-run_set()
+# run_set()

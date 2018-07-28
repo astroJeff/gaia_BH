@@ -13,8 +13,7 @@ import orbit
 
 def plot_pos(p, obs_pos):
 
-    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 100)
-
+    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 1000)
 
     if type(p) is tuple or p.ndim==1:
         if len(p)==8:
@@ -51,8 +50,7 @@ def plot_pos(p, obs_pos):
 
 def plot_pos_ra(p, obs_pos):
 
-    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 100)
-
+    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 1000)
 
     if type(p) is tuple or p.ndim==1:
         if len(p)==8:
@@ -63,7 +61,7 @@ def plot_pos_ra(p, obs_pos):
             p_full = p
 
         ra, dec = orbit.get_ra_dec(p_full, t_tmp)
-        plt.plot(t_tmp/c.c.secyer, ra*3600.0*1.0e3, color='k')
+        plt.plot(t_tmp/c.secyer, ra*3600.0*1.0e3, color='k')
     else:
         for x in p:
             if len(x)==8:
@@ -77,6 +75,8 @@ def plot_pos_ra(p, obs_pos):
             plt.plot(t_tmp/c.secyer, ra*3600.0*1.0e3, alpha=0.05, color='k')
 
 
+    ra_tmp, dec_tmp = orbit.get_ra_dec(p_full, obs_pos['time'])
+
     plt.scatter(obs_pos['time']/c.secyer, obs_pos['ra']*3600.0*1.0e3)
 
 #     plt.ylim(-2, 2)
@@ -87,7 +87,7 @@ def plot_pos_ra(p, obs_pos):
 
 def plot_pos_dec(p, obs_pos):
 
-    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 100)
+    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 1000)
 
 
     if type(p) is tuple or p.ndim==1:
@@ -124,7 +124,7 @@ def plot_pos_dec(p, obs_pos):
 
 def plot_rv(p, obs_pos):
 
-    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 100)
+    t_tmp = np.linspace(np.min(obs_pos['time']), np.max(obs_pos['time']), 1000)
 
 
     if type(p) is tuple or p.ndim==1:
