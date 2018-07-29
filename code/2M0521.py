@@ -111,8 +111,8 @@ def get_truths_2M0521(M_BH):
     P = 83.2 * 3600.0*24.0  # 83.2 day orbital period
     tau = 100.0
     gamma = 2.56
-    M1 = M_BH*c.Msun
-    M2 = 3.0*c.Msun
+    M1 = 3.0*c.Msun
+    M2 = M_BH*c.Msun
 
     truths = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance
 

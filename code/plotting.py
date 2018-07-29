@@ -157,7 +157,7 @@ def plot_rv(p, obs_pos):
     plt.show()
 
 
-def plot_trace(chains, alpha=0.05, filename=None):
+def plot_trace(chains, alpha=0.05, filename=None, truths=None):
 
     fig, ax = plt.subplots(6, 2, figsize=(12, 18))
 
@@ -165,6 +165,10 @@ def plot_trace(chains, alpha=0.05, filename=None):
             r'$\gamma$', r'M$_1$', r'M$_2$', 'distance']
 
     nwalker, nstep, ndim = chains.shape
+
+    if truths is not None and len(truths) != ndim:
+        print("If you provide truths, they must be of the same length as chains.")
+        return
 
     for j in range(ndim):
 
@@ -178,6 +182,7 @@ def plot_trace(chains, alpha=0.05, filename=None):
 
         ax[jx,jy].set_xlabel("Step")
 
+        ax[jx,jy].axhline(truths[j], color='r', linestyle='solid')
 
     plt.tight_layout()
 
@@ -189,7 +194,7 @@ def plot_trace(chains, alpha=0.05, filename=None):
     plt.clf()
 
 
-def plot_corner(chains, truths, filename=None):
+def plot_corner(chains, truths=None, filename=None):
     labels=[r'$\alpha$', r'$\delta$', r'$\Omega$', r'$\omega$', r'$i$', r'$\tau$', r'$e$', r'$P_{\rm orb}$', r'$\gamma$', \
             r'M$_1$', r'M$_2$', 'distance']
 
