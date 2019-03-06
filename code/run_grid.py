@@ -1,8 +1,10 @@
 import numpy as np
 import time
 from scipy.interpolate import interp1d
+import sys
 
 import emcee
+
 
 import orbit
 import prob
@@ -50,8 +52,6 @@ def start_position(M1, M2, distance, P_orb, t_obs, pm_ra, pm_dec,
 
 
 def run_one_M2(P_orb=100.0, M2=1.0e-3, nburn=1000, nrun=5000):
-
-    start_time = time.time()
 
     dist_set = np.logspace(1, 4, 4)
     M1_set = [1.0, 10.0]
@@ -172,6 +172,26 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
     return sampler
 
 
+
+
+
+def run_only_one(P_orb, dist, M1, M2, nburn, nrun):
+
+    sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday, nburn=nburn, nrun=nrun)
+
+    fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
+    np.save(fileout + "_chains.npy", sampler.chain[:,::10,:])
+    np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
+
+
+# Binary parameters
+P_orb = float(sys.argv[1])
+M1 = float(sys.argv[2])
+M2 = float(sys.argv[3])
+dist = float(sys.argv[4])
+
+# Run the binary
+run_only_one(P_orb, M1, M2, dist, 1000, 10000)
 
 
 
