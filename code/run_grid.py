@@ -192,7 +192,7 @@ P_orb = float(sys.argv[4])
 
 
 # Run the binary
-run_only_one(dist, M1, M2, P_orb, 2, 100)
+run_only_one(dist, M1, M2, P_orb, 1000, 10000)
 
 
 
