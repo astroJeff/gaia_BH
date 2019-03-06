@@ -70,7 +70,7 @@ r_2 &=& \frac{1-e^2}{1+e \cos f} \frac{M_1}{M_1+M_2} a.
 
 Under observation, all binaries suffer from perspective effects depending on the orientation of the binary relative to an observer. These are summarized by three angles: the inclination angle, $I$, the argument of periapse, $\omega$, and the longitude of the ascending node, $\Omega$. Dividing by the distance to the binary, $d$, provides an equation for the angular position of stellar component of a binary relative to its center of mass. Adding the center of mass coordinate gives an equation for the absolute angular position of a star in a binary as a function of $f$:
 \begin{eqnarray}
-\alpha_1 &=& \alpha + \frac{r_1}{d} \left[ \cos \Omega \cos (\omega+f) - \sin \Omega \sin(\omega+f) \cos I \right] \nonumber \\
+\alpha_1 &=& \alpha + \frac{1}{\cos \delta}\frac{r_1}{d} \left[ \cos \Omega \cos (\omega+f) - \sin \Omega \sin(\omega+f) \cos I \right] \nonumber \\
 \delta_1 &=& \delta + \frac{r_1}{d} \left[ \sin \Omega \cos (\omega+f) + \cos \Omega \sin(\omega+f) \cos I \right].
 \end{eqnarray}
 An analogous equation expresses the position of the secondary star, or it can be expressed as a function of $(\alpha_1, \delta_1)$:
@@ -81,9 +81,9 @@ An analogous equation expresses the position of the secondary star, or it can be
 
 
 
-For a well-sampled orbit with precise enough astrometry to observe the orbital motion of one of the stars in the orbit, all the angles, $f$, $\omega$, $\Omega$, and $I$, as well as the orbital parameters, $e$  and $P_{\rm orb}$, can all be measured as precisely as the astrometric data allows. However, the last Campbell orbital element, $a$, remains undetermined. Assuming the system's astrometric parallax (and therefore the distance) is known, only $r_1$ can be measured observationally. Substituting in for $a$ using Equation \ref{eq:kepler_3}, we find a relation between the unknown masses, and the measured orbital parameters:
+For a well-sampled orbit with precise enough astrometry to observe the orbital motion of one of the stars in the orbit, all the angles, $f$, $\omega$, $\Omega$, and $I$, as well as the orbital parameters, $e$  and $P_{\rm orb}$, can all be measured as precisely as the astrometric data allows. However, the last Campbell orbital element, $a$, remains undetermined. Assuming the system's astrometric parallax (and therefore the distance) is known, only $r_1$ can be measured observationally. Substituting in for $a$ using Equation \ref{eq:kepler_3}, we find a relation between the unknown masses, and the measured orbital parameters. Measured in terms of the orbital separation at apastron ($r_{\rm 1, ap}$) or at periastron ($r_{\rm 1, peri}$), the masses are equal to:
 \begin{equation}
-\frac{M_2}{\left( M_1 + M_2 \right)^{2/3}} = \frac{1 + e \cos f}{1 - e^2} \left( \frac{P_{\rm orb}}{2 \pi} \right)^{-2/3} \frac{d}{\mathcal{G}^{1/3}}.
+\frac{M_2}{\left( M_1 + M_2 \right)^{2/3}} = \frac{r_{\rm 1, ap}}{1 + e} \left( \frac{P_{\rm orb}}{2 \pi} \right)^{-2/3} \frac{1}{\mathcal{G}^{1/3}} = \frac{r_{\rm 1, peri}}{1 - e} \left( \frac{P_{\rm orb}}{2 \pi} \right)^{-2/3} \frac{1}{\mathcal{G}^{1/3}}.
 \end{equation}
 Regardless of the orbital phase, we can only obtain a measurement of the combined quantity $M_2 \left( M_1 + M_2 \right)^{-2/3}$. Additional information is required to break the degeneracy.
 
@@ -103,9 +103,9 @@ Subtracting the minimum radial velocity from the maximum radial velocity and div
 K = \frac{M_2}{(M_1 + M_2)^{2/3}} \left( \frac{\bigG 2 \pi}{\Porb}\right)^{1/3} \frac{1}{\sqrt{1-e^2}} \sin I.
 \end{equation}
 
-This is analogous to the mass constraints from astrometry. Assuming $K$, $e$, $P_{\rm orb}$, and $I$ are all well measured, we find a constraint on a combined mass term:
+This is analogous to the mass constraints from astrometry. Assuming $K$, $e$, $P_{\rm orb}$, and $I$ are all well measured, we find a constraint on a combined mass term. This is equivalent to the mass function $m_f$:
 \begin{equation}
-\frac{M_2}{\left( M_1 + M_2 \right)^{2/3}} = \frac{K}{\bigG^{1/3}} \left( \frac{P_{\rm orb}}{2 \pi} \right)^{1/3} \frac{\sqrt{1-e^2}}{\sin I}
+m_f = \frac{\left( M_2 \sin I \right)^3}{\left( M_1 + M_2 \right)^2} = \frac{K^3}{\bigG} \left( \frac{P_{\rm orb}}{2 \pi} \right) \left(1-e^2 \right)^{3/2}.
 \end{equation}
 
 
@@ -113,14 +113,15 @@ This is analogous to the mass constraints from astrometry. Assuming $K$, $e$, $P
 {\large \textbf{ Mass Degeneracy:}}
 %\section{Mass Degeneracy}
 
-Again, assuming precise astrometric observations of the orbit, we can determine a constant $C_0$ either through radial velocity observations or astrometric observations (or both):
+Again, assuming precise astrometric observations of the orbit (so we have the inclination angle of the system), we can determine the mass function either through radial velocity observations or astrometric observations (or both):
 \begin{equation}
-C_0 = \sqrt{1-e^2} \left( \frac{\Porb}{\bigG 2 \pi}\right)^{1/3} \frac{K}{\sin I} = \frac{1 + e \cos f}{1 - e^2} \left( \frac{P_{\rm orb}}{2 \pi} \right)^{-2/3} \frac{d}{\mathcal{G}^{1/3}}.
+m_f= \left(1-e^2\right)^{3/2} \left( \frac{\Porb}{\bigG 2 \pi}\right) K^3 = \left(\frac{r_{\rm 1, ap}}{1 + e} \right)^3 \left( \frac{P_{\rm orb}}{2 \pi} \right)^{-2} \frac{\sin^3 I}{\mathcal{G}}.
 \end{equation}
 
-Therefore, we can characterize the mass degeneracy:
+Therefore, we can characterize the mass degeneracy in terms of $m_f$ and $I$:
 \begin{equation}
-M_1 = \left( \frac{M_2}{C_0} \right)^{3/2} - M_2.
+M_1 = \sqrt{\frac{(M_2 \sin I)^3}{m_f}} - M_2.
+% M_1 = \left( \frac{M_2}{C_0} \right)^{3/2} - M_2.
 \end{equation}
 Therefore, $M_1$ and $M_2$ cannot be independently determined.
 
@@ -130,10 +131,10 @@ In Figure \ref{fig:mass_degeneracy}, we integrate the orbits of binary stars of 
 
 %\vspace{-100.0cm}
 
-\begin{wrapfigure}{C}{0.75\textwidth}
+\begin{wrapfigure}{C}{0.95\textwidth}
 %\begin{figure}
 \begin{center}
- \includegraphics[scale=0.75]{../figures/mass_degeneracy_orbital_integration.pdf}
+ \includegraphics[scale=0.70]{../figures/mass_degeneracy_orbital_integration.pdf}
 \end{center}
 \vspace{-1.0cm}
  \caption{\it Orbital integrations for half an orbit (hence the half-circles). With exactly the same astrometric data for the luminous star (black curve), different combinations are possible for the two stars' masses. We show the orbits of the unseen companions for three possible mass combinations, each of which have the same orbit for the luminous star.} \label{fig:mass_degeneracy}

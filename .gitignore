@@ -3,3 +3,7 @@ docs/*.aux
 docs/*.log
 docs/*.gz
 docs/*.out
+notebooks/.ipynb*
+literature
+.DS_Store
+code/__pycache__
