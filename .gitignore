@@ -7,3 +7,6 @@ notebooks/.ipynb*
 literature
 .DS_Store
 code/__pycache__
+code/skycalc
+code/skycalc_parallax
+code/*.so
