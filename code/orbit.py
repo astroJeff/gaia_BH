@@ -40,9 +40,17 @@ def get_f(p, t_set):
     E_set = np.array([])
     if isinstance(t_set, np.ndarray):
         for t in t_set:
-            E_set = np.append(E_set, newton(func_E, t, args=(n,t,tau,e)))
+            try:
+                E_new = newton(func_E, t, args=(n,t,tau,e))
+            except:
+                return None
+            E_set = np.append(E_set, E_new)
     else:
-        E_set = np.append(E_set, newton(func_E, t_set, args=(n,t_set,tau,e)))
+        try:
+            E_new = newton(func_E, t_set, args=(n,t_set,tau,e))
+        except:
+            return None
+        E_set = np.append(E_set, E_new)
 
     f_set = np.array([])
     for E in E_set:
@@ -65,6 +73,7 @@ def get_r_dot(p, t):
     n = 2.0*np.pi / P
     A = np.power(mu/(n*n), 1.0/3.0)
     f = get_f(p, t)
+    if f is None: return None
 
     r_dot = A * e * np.sin(f) / np.sqrt(1.0 - e*e) * n
 
@@ -80,6 +89,7 @@ def get_r_f_dot(p, t):
     n = 2.0*np.pi / P
     A = np.power(mu/(n*n), 1.0/3.0)
     f = get_f(p, t)
+    if f is None: return None
 
     r_f_dot = n * A / np.sqrt(1.0 - e*e) * (1.0 + e*np.cos(f))
 
@@ -94,6 +104,7 @@ def get_RV(p, t):
     n = 2.0*np.pi / P
     A = np.power(mu/(n*n), 1.0/3.0)
     f = get_f(p, t)
+    if f is None: return None
 
     # r_dot = get_r_dot(p, t)
     # r_f_dot = get_r_f_dot(p, t)
@@ -123,6 +134,7 @@ def get_ra_dec(p, t):
     n = 2.0*np.pi / P
     A = np.power(mu/(n*n), 1.0/3.0)
     f = get_f(p, t)
+    if f is None: return None, None
 
     # Get the distance from M2 to the barycenter
     sep = A * (1.0 - e**2) / (1.0 + e * np.cos(f)) * (M2 / (M1+M2))
@@ -168,6 +180,7 @@ def get_ra_dec_all(p, t, include_orbit=True, include_parallax=True, include_prop
     # Orbital Motion
     if include_orbit:
         ra_orb, dec_orb = get_ra_dec(p_orb, t*secday)
+        if ra_orb is None or dec_orb is None: return None, None
     else:
         ra_orb, dec_orb = 0.0, 0.0
 

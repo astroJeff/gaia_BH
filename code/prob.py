@@ -24,6 +24,7 @@ def ln_likelihood_ra(p, obs_pos):
     # Calculate position
     obs_time = obs_pos["time"]
     ra_out, dec_out = orbit.get_ra_dec(p, obs_time)
+    if ra_out is None or dec_out is None: return -np.inf
 
     # Work in degrees
     ra_diff = ra_out - obs_pos["ra"]
@@ -38,6 +39,7 @@ def ln_likelihood_dec(p, obs_pos):
     # Calculate position
     obs_time = obs_pos["time"]
     ra_out, dec_out = orbit.get_ra_dec(p, obs_time)
+    if ra_out is None or dec_out is None: return -np.inf
 
     # Work in asec-space
     dec_diff = dec_out - obs_pos["dec"]
@@ -52,6 +54,7 @@ def ln_likelihood_pos(p, obs_pos):
     # Calculate position
     obs_time = obs_pos["time"]
     ra_out, dec_out = orbit.get_ra_dec(p, obs_time)
+    if ra_out is None or dec_out is None: return -np.inf
 
     # Work in asec-space
     ra_diff = ra_out - obs_pos["ra"]
@@ -94,7 +97,11 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
     ra_tmp = np.zeros(len(t_obs))
     dec_tmp = np.zeros(len(t_obs))
     for i, t in enumerate(t_obs):
-        ra_tmp[i], dec_tmp[i] = orbit.get_ra_dec_all(p, t)
+        ra_tmp_i, dec_tmp_i = orbit.get_ra_dec_all(p, t)
+        if ra_tmp_i is None or dec_tmp_i is None: return -np.inf
+
+        ra_tmp[i], dec_tmp[i] = ra_tmp_i, dec_tmp_i
+
 
     # Gaussian errors
     ln_likelihood = -np.sum((ra_obs-ra_tmp)**2 / (2.0*(ra_err/1.0e3/3600.0)**2))

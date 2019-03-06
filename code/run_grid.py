@@ -154,7 +154,10 @@ def get_pos_obs(p, t_obs, pos_err):
     dec_tmp = np.zeros(len(t_obs))
 
     for i, t in enumerate(t_obs):
-        ra_tmp[i], dec_tmp[i] = orbit.get_ra_dec_all(p, t)
+        ra_tmp_i, dec_tmp_i = orbit.get_ra_dec_all(p, t)
+        if ra_tmp_i is None or dec_tmp_i is None: return None, None
+
+        ra_tmp[i], dec_tmp[i] = ra_tmp_i, dec_tmp_i
 
     # Errors are in mas, while ra_tmp is in degrees
     ra_obs = ra_tmp + (pos_err/3600.0/1.0e3)*np.random.normal(size=len(t_obs))
