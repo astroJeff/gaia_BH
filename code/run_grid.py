@@ -175,7 +175,7 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
 
 
 
-def run_only_one(P_orb, dist, M1, M2, nburn, nrun):
+def run_only_one(dist, M1, M2, P_orb, nburn, nrun):
 
     sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday, nburn=nburn, nrun=nrun)
 
@@ -185,13 +185,14 @@ def run_only_one(P_orb, dist, M1, M2, nburn, nrun):
 
 
 # Binary parameters
-P_orb = float(sys.argv[1])
+dist = float(sys.argv[1])
 M1 = float(sys.argv[2])
 M2 = float(sys.argv[3])
-dist = float(sys.argv[4])
+P_orb = float(sys.argv[4])
+
 
 # Run the binary
-run_only_one(P_orb, M1, M2, dist, 1000, 10000)
+run_only_one(dist, M1, M2, P_orb, 2, 100)
 
 
 
