@@ -1,5 +1,6 @@
 import numpy as np
 import orbit
+import const as c
 
 include_M2_photo = False
 
@@ -84,42 +85,6 @@ def ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err):
 
 
 
-def get_ra_dec_all(p, t, include_orbit=True, include_parallax=True, include_proper_motion=True):
-
-    sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
-    p_orb = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance
-
-    # Get parallax from distance
-    parallax = 1.0e3/distance
-
-    # Parallax
-    if include_parallax:
-        sys_ra_hour = sys_ra / 360.0 * 24.0  # convert from decimal degrees to decimal hours
-        output = parellipse(t, sys_ra_hour, sys_dec, 2015.0, 0.0, 0.0)
-        ra_out = output[0] * parallax
-        dec_out = output[1] * parallax
-    else:
-        ra_out = np.zeros(len(t))
-        dec_out = np.zeros(len(t))
-
-
-    # Proper Motion
-    if include_proper_motion:
-        ra_out += pm_ra * (t*c.secday - tau)/c.secday/365.25
-        dec_out += pm_dec * (t*c.secday - tau)/c.secday/365.25
-
-
-    # Orbital Motion
-    if include_orbit:
-        ra_orb, dec_orb = get_ra_dec(p_orb, t*c.secday)
-    else:
-        ra_orb, dec_orb = 0.0, 0.0
-
-    ra_out = ra_out/(3600.0*1.0e3) + ra_orb
-    dec_out = dec_out/(3600.0*1.0e3) + dec_orb
-
-    return ra_out, dec_out
-
 
 
 def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
@@ -129,7 +94,7 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
     ra_tmp = np.zeros(len(t_obs))
     dec_tmp = np.zeros(len(t_obs))
     for i, t in enumerate(t_obs):
-        ra_tmp[i], dec_tmp[i] = get_ra_dec_all(p, t)
+        ra_tmp[i], dec_tmp[i] = orbit.get_ra_dec_all(p, t)
 
     # Gaussian errors
     ln_likelihood = -np.sum((ra_obs-ra_tmp)**2 / (2.0*(ra_err/1.0e3/3600.0)**2))
@@ -145,21 +110,38 @@ def get_prior(p):
     lp = 0.0
 
     if sys_ra < 0.0 or sys_ra > 360.0: return -np.inf
+    # print("Here 1")
     if sys_dec < -90.0 or sys_dec > 90.0: return -np.inf
+    # print("Here 2")
     if Omega < 0.0 or Omega > 2.0*np.pi: return -np.inf
+    # print("Here 3")
     if omega < 0.0 or omega > np.pi: return -np.inf
+    # print("Here 4")
     if I < 0.0 or I > np.pi: return -np.inf
+    # print("Here 5")
     if tau < 2451545.*c.secday or tau > 2471545.*c.secday: return -np.inf
+    # print("Here 6")
     if e < 0. or e >= 1.0: return -np.inf
+    # print("Here 7")
     if P < 0.0 or P > 1.0e4*c.secday: return -np.inf
+    # print("Here 8")
     if M1 < 0.0 or M1 > 10.0*c.Msun: return -np.inf
+    # print("Here 9")
     if M2 < 0.0 or M2 > 10.0*c.Msun: return -np.inf
+    # print("Here 10")
     if distance < 0.0 or distance > 2000.0: return -np.inf
+    # print("Here 11")
     if pm_ra < -1.0e4 or pm_ra > 1.0e4: return -np.inf
+    # print("Here 12")
     if pm_dec < -1.0e4 or pm_dec > 1.0e4: return -np.inf
+    # print("Here 13")
 
     # Prior on inclination angle
     lp = lp + np.log(np.sin(I)/2.0)
+
+    # Distance prior Lutz-Kelker bias
+    distance_max = 20.0e3  # Maximum distance of 20 kpc
+    lp = lp + np.log(3.0 * distance**2 / distance_max**3)
 
     return lp
 
@@ -169,6 +151,7 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, M1, M2, distance, pm_ra, pm_dec = p
 
     lp = get_prior(p)
+
     if np.isinf(lp): return -np.inf
 
     gamma = 0.0 # Holder variable - not a useful parameter
@@ -176,12 +159,19 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
     ll = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err)
 
 
+    if np.isnan(ll): return -np.inf
+
     return lp+ll
 
 
 
 
 
+##############
+#   OLD CODE #
+##############
+#
+#
 #
 # # The posterior function calls the likelihood and prior functions
 # def ln_posterior(p, obs_pos, M2_obs, M2_obs_err):

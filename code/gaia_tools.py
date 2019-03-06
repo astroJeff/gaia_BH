@@ -7,7 +7,7 @@ from pygaia.errors.astrometric import parallaxError as plxErr
 from pygaia.errors.utils import averageNumberOfTransits as N_transit_ave
 
 
-def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None, 
+def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
     """ A tool to determine the single observation astrometric precision. This is
     calculated in a bit of an ad hoc way. We call the overall parallax precision, then
@@ -43,18 +43,23 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
     if G is None and V is None:
         print("You must provide at least one color: G or V")
         return
-    
-    if RA is None and Dec in None:
-        print("You must provide a RA and Dec")
-        return
 
     if DIST is None:
         print("You must provide a distance")
         return
 
     # KMB: get ecliptic latitude from ra/dec using astropy
-    coords = SkyCoord(x=XGX*u.parsec, y=YGX*u.parsec, z=ZGX*u.parsec,
-                      frame='galactocentric')
+    if (RA is None or Dec is None) and (XGX is None or YGX is None or ZGX is None):
+        print("You must provide a position, either in RA, Dec or XGX, YGX, ZGX")
+        return
+
+    # Use the position
+    if (RA is None or Dec is None):
+        coords = SkyCoord(x=XGX*u.parsec, y=YGX*u.parsec, z=ZGX*u.parsec,
+                          frame='galactocentric')
+    else:
+        coords = SkyCoord(ra=RA*u.deg, dec=Dec*u.deg, distance=DIST*u.pc, frame='icrs')
+
     ecl_lat = coords.heliocentrictrueecliptic.lat.deg
 
     # KMB: compute average N_obs for given ecliptic latitude
@@ -70,7 +75,7 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
     return pos_err_single
 
 
-def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None, 
+def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
 
     """ A tool to determine the parallax uncertainty for a star
@@ -109,14 +114,14 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
         return
 
     if G is None:  G = V - 0.0257 - 0.0924 * (V_IC) - 0.1623 * (V_IC)**2 + 0.0090 * (V_IC)**3
- 
+
     if RA is None and Dec is None:
         print("You must provide an RA and Dec")
         return
 
     if DIST is None:
         print("You must provide a distance")
-        return  
+        return
 
     # KMB: get ecliptic latitude from ra/dec using astropy
     coords = SkyCoord(x=XGX*u.parsec, y=YGX*u.parsec, z=ZGX*u.parsec,
@@ -174,7 +179,7 @@ def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
 
     if DIST is None:
         print("You must provide an RA and Dec")
-        return 
+        return
 
     # KMB: get ecliptic latitude from ra/dec using astropy
     c = SkyCoord(ra=RA*u.degree, dec=Dec*u.degree, distance=DIST*u.parsec, frame='icrs')

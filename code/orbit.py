@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import newton
+from _skysub import parellipse
 
 
 # Constants
@@ -134,3 +135,43 @@ def get_ra_dec(p, t):
     delta_out = sys_dec + d_delta * (180.0/np.pi)
 
     return alpha_out, delta_out
+
+
+
+
+
+def get_ra_dec_all(p, t, include_orbit=True, include_parallax=True, include_proper_motion=True):
+
+    sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
+    p_orb = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance
+
+    # Get parallax from distance
+    parallax = 1.0e3/distance
+
+    # Parallax
+    if include_parallax:
+        sys_ra_hour = sys_ra / 360.0 * 24.0  # convert from decimal degrees to decimal hours
+        output = parellipse(t, sys_ra_hour, sys_dec, 2015.0, 0.0, 0.0)
+        ra_out = output[0] * parallax
+        dec_out = output[1] * parallax
+    else:
+        ra_out = np.zeros(len(t))
+        dec_out = np.zeros(len(t))
+
+
+    # Proper Motion
+    if include_proper_motion:
+        ra_out += pm_ra * (t*secday - tau)/secday/365.25
+        dec_out += pm_dec * (t*secday - tau)/secday/365.25
+
+
+    # Orbital Motion
+    if include_orbit:
+        ra_orb, dec_orb = get_ra_dec(p_orb, t*secday)
+    else:
+        ra_orb, dec_orb = 0.0, 0.0
+
+    ra_out = ra_out/(3600.0*1.0e3) + ra_orb
+    dec_out = dec_out/(3600.0*1.0e3) + dec_orb
+
+    return ra_out, dec_out
