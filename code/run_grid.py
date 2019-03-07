@@ -90,7 +90,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000):
     G_mag = get_M_G(M1/c.Msun) + 5.0*np.log10(distance) - 5.0
 
     pos_err = gaia.get_single_obs_pos_err(G=G_mag, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
-    pos_err *= 3600.0 * 1.0e3  # in mas, not deg
+    pos_err *= 1.0e3  # in mas, not asec
 
     # Calculate observed positions
     ra_obs, dec_obs = get_pos_obs(p, t_obs, pos_err)
