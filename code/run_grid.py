@@ -26,7 +26,9 @@ def load_t_obs(filename="../data/cadence/J1102.csv"):
 def load_stellar_photometry():
     data = np.genfromtxt("../data/mamajek_colors.dat", names=True)
     get_V_IC = interp1d(data['Msun'], data['VIc'])
-    get_M_G = interp1d(data['Msun'], data['M_G'])
+    M_G = data['M_G']
+    M_G[data['Msun']>2.0] = data['Mv'][data['Msun']>2.0]
+    get_M_G = interp1d(data['Msun'], M_G)
 
     return get_V_IC, get_M_G
 
