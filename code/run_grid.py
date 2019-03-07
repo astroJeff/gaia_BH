@@ -76,8 +76,8 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000):
     t_obs = data['ObservationTimeAtBarycentreBarycentricJulianDateInTCB']
 
     # Set proper motion
-    pm_ra = 1.0  # in mas/yr
-    pm_dec = 1.0  # in mas/yr
+    pm_ra = 10.0  # in mas/yr
+    pm_dec = 10.0  # in mas/yr
 
     # Create tuple of initial values
     p = start_position(M1, M2, distance, P_orb, t_obs, pm_ra, pm_dec,
@@ -127,8 +127,8 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, nwalkers=128)
     M1_set = M1 * (1. + 1.0e-2*np.random.normal(size=nwalkers))
     M2_set = M2 * (1. + 1.0e-2*np.random.normal(size=nwalkers))
     distance_set = distance + np.random.normal(size=nwalkers)
-    pm_ra_set = pm_ra + np.random.normal(size=nwalkers)
-    pm_dec_set = pm_dec + np.random.normal(size=nwalkers)
+    pm_ra_set = pm_ra * (1. + 1.0e-2*np.random.normal(size=nwalkers))
+    pm_dec_set = pm_dec * (1. + 1.0e-2*np.random.normal(size=nwalkers))
 
     p0 = np.array([sys_ra_set,
                    sys_dec_set,
@@ -183,7 +183,7 @@ def run_only_one(dist, M1, M2, P_orb, nburn, nrun):
     sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday, nburn=nburn, nrun=nrun)
 
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
-    np.save(fileout + "_chains.npy", sampler.chain[:,::10,:])
+    np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
     np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
 
 
