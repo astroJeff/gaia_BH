@@ -2,6 +2,8 @@ import numpy as np
 import orbit
 import const as c
 
+import photometry
+
 include_M2_photo = False
 
 
@@ -90,7 +92,7 @@ def ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err):
 
 
 
-def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
+def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
 
@@ -106,6 +108,12 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
     # Gaussian errors
     ln_likelihood = -np.sum((ra_obs-ra_tmp)**2 / (2.0*(ra_err/1.0e3/3600.0)**2))
     ln_likelihood -= np.sum((dec_obs-dec_tmp)**2 / (2.0*(dec_err/1.0e3/3600.0)**2))
+
+    # Include limits on the photometry
+    if G_mag_obs is not None:
+        G_mag_model = photometry.get_G_mag_apparent(M1/c.Msun, distance)
+        ln_likelihood += -(G_mag_obs - G_mag_model)**2/(2.0*G_mag_err**2)
+
 
     return ln_likelihood
 
@@ -153,7 +161,7 @@ def get_prior(p):
     return lp
 
 
-def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
+def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, M1, M2, distance, pm_ra, pm_dec = p
 
@@ -163,7 +171,7 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err):
 
     gamma = 0.0 # Holder variable - not a useful parameter
     p = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec
-    ll = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err)
+    ll = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err)
 
 
     if np.isnan(ll): return -np.inf

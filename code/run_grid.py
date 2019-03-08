@@ -4,15 +4,13 @@ from scipy.interpolate import interp1d
 import sys
 
 import emcee
-
+import pygaia.errors.photometric as gaia_photometric
 
 import orbit
 import prob
 import gaia_tools as gaia
 import const as c
-
-
-
+import photometry
 
 
 
@@ -22,20 +20,6 @@ def load_t_obs(filename="../data/cadence/J1102.csv"):
     data = np.genfromtxt(filename, delimiter=',', names=True)
 
     return data
-
-def load_stellar_photometry():
-    data = np.genfromtxt("../data/mamajek_colors.dat", names=True)
-    get_V_IC = interp1d(data['Msun'], data['VIc'])
-    M_G = data['M_G']
-    M_G[data['Msun']>2.0] = data['Mv'][data['Msun']>2.0]
-    get_M_G = interp1d(data['Msun'], M_G)
-
-    return get_V_IC, get_M_G
-
-
-
-def load_stellar_colors():
-    data = np.genfromtxt("../data/mamajek_colors.dat", names=True)
 
 
 
@@ -71,7 +55,7 @@ def run_one_M2(P_orb=100.0, M2=1.0e-3, nburn=1000, nrun=5000):
 
 
 
-def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000):
+def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_photo=True):
 
     # Load Gaia observation times
     data = load_t_obs()
@@ -87,18 +71,24 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000):
                        omega=np.pi/3.0, I=np.pi/3.0, e=0.01, gamma=0.0)
 
     # Get observation uncertainty - use Main Sequence star tables
-    get_V_IC, get_M_G = load_stellar_photometry()
-    V_IC = get_V_IC(M1/c.Msun)
-    G_mag = get_M_G(M1/c.Msun) + 5.0*np.log10(distance) - 5.0
+    # get_V_IC, get_M_G = load_stellar_photometry()
+    # V_IC = get_V_IC(M1/c.Msun)
+    # G_mag = get_M_G(M1/c.Msun) + 5.0*np.log10(distance) - 5.0
+    G_mag_obs = None
+    G_mag_err = None
+    if include_M2_photo:
+        V_IC = photometry.get_V_IC(M1/c.Msun)
+        G_mag_obs = photometry.get_G_mag_apparent(M1/c.Msun, distance)
+        G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
 
-    pos_err = gaia.get_single_obs_pos_err(G=G_mag, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
+    pos_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
     pos_err *= 1.0e3  # in mas, not asec
 
     # Calculate observed positions
     ra_obs, dec_obs = get_pos_obs(p, t_obs, pos_err)
 
     # Initialize walkers using start position
-    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, pos_err, pos_err, nwalkers=128)
+    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, pos_err, pos_err, G_mag_obs, G_mag_err, nwalkers=128)
 
     # Run sampler
     sampler = run_emcee(sampler, p0, nburn=nburn, nrun=nrun)
@@ -107,7 +97,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000):
 
 
 
-def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, nwalkers=128):
+def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err, nwalkers=128):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
 
@@ -115,7 +105,7 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, nwalkers=128)
     sampler = emcee.EnsembleSampler(nwalkers=nwalkers,
                                     dim=13,
                                     lnpostfn=prob.get_ln_posterior,
-                                    args=(ra_obs, dec_obs, t_obs, ra_err, dec_err))
+                                    args=(ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err))
 
     # Initialize walkers
     sys_ra_set = sys_ra + 1.0e-10*np.random.normal(size=nwalkers)
@@ -180,9 +170,10 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
 
 
 
-def run_only_one(dist, M1, M2, P_orb, nburn, nrun):
+def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False):
 
-    sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday, nburn=nburn, nrun=nrun)
+    sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
+                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo)
 
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
     np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
@@ -197,7 +188,7 @@ P_orb = float(sys.argv[4])
 
 
 # Run the binary
-run_only_one(dist, M1, M2, P_orb, 1000, 10000)
+run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
 
 
 
