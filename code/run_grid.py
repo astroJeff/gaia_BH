@@ -76,13 +76,14 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     # G_mag = get_M_G(M1/c.Msun) + 5.0*np.log10(distance) - 5.0
     G_mag_obs = None
     G_mag_err = None
-    if include_M2_photo:
-        V_IC = photometry.get_V_IC(M1/c.Msun)
-        G_mag_obs = photometry.get_G_mag_apparent(M1/c.Msun, distance)
-        G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
+    V_IC = photometry.get_V_IC(M1/c.Msun)
+    G_mag_obs = photometry.get_G_mag_apparent(M1/c.Msun, distance)
+    G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
 
     pos_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
     pos_err *= 1.0e3  # in mas, not asec
+
+    if include_M2_photo: G_mag_obs = None
 
     # Calculate observed positions
     ra_obs, dec_obs = get_pos_obs(p, t_obs, pos_err)
