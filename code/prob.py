@@ -130,11 +130,11 @@ def get_prior(p):
     # print("Here 6")
     if e < 0. or e >= 1.0: return -np.inf
     # print("Here 7")
-    if P < 0.0 or P > 1.0e4*c.secday: return -np.inf
+    if P < 0.0 or P > 2.0e4*c.secday: return -np.inf
     # print("Here 8")
-    if M1 < 0.0 or M1 > 10.0*c.Msun: return -np.inf
+    if M1 < 0.0 or M1 > 20.0*c.Msun: return -np.inf
     # print("Here 9")
-    if M2 < 0.0 or M2 > 10.0*c.Msun: return -np.inf
+    if M2 < 0.0 or M2 > 20.0*c.Msun: return -np.inf
     # print("Here 10")
     if distance < 0.0 or distance > 2000.0: return -np.inf
     # print("Here 11")
