@@ -1,6 +1,9 @@
 import numpy as np
+from scipy.stats import multivariate_normal
+
 import orbit
 import const as c
+from gaia_tools import AC_err
 
 import photometry
 
@@ -92,9 +95,11 @@ def ln_likelihood_M2_photo(p, obs_pos, M2_obs, M2_obs_err):
 
 
 
-def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err):
+def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
+
+    ln_likelihood = 0.0
 
     ra_tmp = np.zeros(len(t_obs))
     dec_tmp = np.zeros(len(t_obs))
@@ -104,10 +109,23 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_m
 
         ra_tmp[i], dec_tmp[i] = ra_tmp_i, dec_tmp_i
 
+        obs_pos_arr = np.array([ra_obs[i], dec_obs[i]])
+        pos_arr = np.array([ra_tmp[i], dec_tmp[i]])
+        obs_cov = np.array([[(AL_err/1.0e3/3600.0)**2, 0.0],
+                            [0.0, (AC_err/1.0e3/3600.0)**2]])
+        rotation_matrix = np.array([[np.cos(obs_angle[i]), -np.sin(obs_angle[i])],
+                                    [np.sin(obs_angle[i]), np.cos(obs_angle[i])]])
+        new_cov = rotation_matrix @ obs_cov @ rotation_matrix.T
+
+        obs_astrometry = multivariate_normal(mean=pos_arr, cov=new_cov)
+
+        # Likelihood accounts for incertainties in both axes
+        ln_likelihood += np.log(obs_astrometry.pdf(obs_pos_arr))
+
 
     # Gaussian errors
-    ln_likelihood = -np.sum((ra_obs-ra_tmp)**2 / (2.0*(ra_err/1.0e3/3600.0)**2))
-    ln_likelihood -= np.sum((dec_obs-dec_tmp)**2 / (2.0*(dec_err/1.0e3/3600.0)**2))
+    # ln_likelihood = -np.sum((ra_obs-ra_tmp)**2 / (2.0*(ra_err/1.0e3/3600.0)**2))
+    # ln_likelihood -= np.sum((dec_obs-dec_tmp)**2 / (2.0*(dec_err/1.0e3/3600.0)**2))
 
     # Include limits on the photometry
     if G_mag_obs is not None:
@@ -161,7 +179,7 @@ def get_prior(p):
     return lp
 
 
-def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err):
+def get_ln_posterior(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, M1, M2, distance, pm_ra, pm_dec = p
 
@@ -171,7 +189,7 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_ma
 
     gamma = 0.0 # Holder variable - not a useful parameter
     p = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec
-    ll = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err)
+    ll = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err)
 
 
     if np.isnan(ll): return -np.inf

@@ -7,6 +7,8 @@ from pygaia.errors.astrometric import parallaxError as plxErr
 from pygaia.errors.utils import averageNumberOfTransits as N_transit_ave
 
 
+AC_err = 612.45  # Across scan error in mas
+
 def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
     """ A tool to determine the single observation astrometric precision. This is

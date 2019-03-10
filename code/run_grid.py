@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from scipy.interpolate import interp1d
+from scipy.stats import multivariate_normal
 import sys
 
 import emcee
@@ -60,6 +61,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     # Load Gaia observation times
     data = load_t_obs()
     t_obs = data['ObservationTimeAtBarycentreBarycentricJulianDateInTCB']
+    obs_angle = data['scanAnglerad']
 
     # Set proper motion
     pm_ra = 10.0  # in mas/yr
@@ -80,16 +82,16 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     G_mag_obs = photometry.get_G_mag_apparent(M1/c.Msun, distance)
     G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
 
-    pos_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
-    pos_err *= 1.0e3  # in mas, not asec
+    AL_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
+    AL_err *= 1.0e3  # in mas, not asec
 
     if include_M2_photo: G_mag_obs = None
 
     # Calculate observed positions
-    ra_obs, dec_obs = get_pos_obs(p, t_obs, pos_err)
+    ra_obs, dec_obs = get_pos_obs(p, t_obs, obs_angle, AL_err)
 
     # Initialize walkers using start position
-    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, pos_err, pos_err, G_mag_obs, G_mag_err, nwalkers=128)
+    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err, nwalkers=128)
 
     # Run sampler
     sampler = run_emcee(sampler, p0, nburn=nburn, nrun=nrun)
@@ -98,7 +100,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
 
 
 
-def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err, nwalkers=128):
+def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err, nwalkers=128):
 
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
 
@@ -106,7 +108,7 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_
     sampler = emcee.EnsembleSampler(nwalkers=nwalkers,
                                     dim=13,
                                     lnpostfn=prob.get_ln_posterior,
-                                    args=(ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_mag_err))
+                                    args=(ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err))
 
     # Initialize walkers
     sys_ra_set = sys_ra + 1.0e-10*np.random.normal(size=nwalkers)
@@ -141,20 +143,33 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, ra_err, dec_err, G_mag_obs, G_
 
 
 
-def get_pos_obs(p, t_obs, pos_err):
+def get_pos_obs(p, t_obs, obs_angle, AL_err):
 
-    ra_tmp = np.zeros(len(t_obs))
-    dec_tmp = np.zeros(len(t_obs))
+    ra_obs = np.zeros(len(t_obs))
+    dec_obs = np.zeros(len(t_obs))
 
     for i, t in enumerate(t_obs):
-        ra_tmp_i, dec_tmp_i = orbit.get_ra_dec_all(p, t)
-        if ra_tmp_i is None or dec_tmp_i is None: return None, None
+        ra_obs_i, dec_obs_i = orbit.get_ra_dec_all(p, t)
+        if ra_obs_i is None or dec_obs_i is None: return None, None
 
-        ra_tmp[i], dec_tmp[i] = ra_tmp_i, dec_tmp_i
+        ra_obs[i], dec_obs[i] = ra_obs_i, dec_obs_i
+
+        # Covariance matrix
+        obs_cov = np.array([[AL_err**2, 0.0],
+                            [0.0, gaia.AC_err**2]])
+        rotation_matrix = np.array([[np.cos(obs_angle[i]), -np.sin(obs_angle[i])],
+                                    [np.sin(obs_angle[i]), np.cos(obs_angle[i])]])
+        new_cov = rotation_matrix @ obs_cov @ rotation_matrix.T
+
+        # Add multivariate errors
+        obs_astrometry = multivariate_normal(mean=np.zeros(2), cov=new_cov)
+        obs_sample = obs_astrometry.rvs(size=1)
+        ra_obs[i] += obs_sample[0]/3600.0/1.0e3
+        dec_obs[i] += obs_sample[1]/3600.0/1.0e3
 
     # Errors are in mas, while ra_tmp is in degrees
-    ra_obs = ra_tmp + (pos_err/3600.0/1.0e3)*np.random.normal(size=len(t_obs))
-    dec_obs = dec_tmp + (pos_err/3600.0/1.0e3)*np.random.normal(size=len(t_obs))
+    # ra_obs = ra_tmp + (pos_err/3600.0/1.0e3)*np.random.normal(size=len(t_obs))
+    # dec_obs = dec_tmp + (pos_err/3600.0/1.0e3)*np.random.normal(size=len(t_obs))
 
     return ra_obs, dec_obs
 
@@ -189,8 +204,8 @@ P_orb = float(sys.argv[4])
 
 
 # Run the binary
-run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
-
+# run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
+run_only_one(dist, M1, M2, P_orb, 2, 100, include_M2_photo=False)
 
 
 
