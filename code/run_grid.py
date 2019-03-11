@@ -118,7 +118,7 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, 
     I_set = I + 1.0e-5*np.random.normal(size=nwalkers)
     tau_set = tau + 1.0e3*np.random.normal(size=nwalkers)
     e_set = e + 1.0e-6*np.random.normal(size=nwalkers)
-    P_set = P + 1.0e3*np.random.normal(size=nwalkers)
+    P_set = P * (1. + 0e-3*np.random.normal(size=nwalkers))
     M1_set = M1 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     M2_set = M2 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     distance_set = distance * (1. + 1.0e-6*np.random.normal(size=nwalkers))
@@ -205,7 +205,7 @@ P_orb = float(sys.argv[4])
 
 # Run the binary
 # run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
-run_only_one(dist, M1, M2, P_orb, 2, 100, include_M2_photo=False)
+run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
 
 
 
