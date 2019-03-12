@@ -192,6 +192,7 @@ def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False):
                              nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo)
 
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
+    if include_M2_photo: fileout = fileout + '_photo' 
     np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
     np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
 
@@ -202,10 +203,12 @@ M1 = float(sys.argv[2])
 M2 = float(sys.argv[3])
 P_orb = float(sys.argv[4])
 
+include_M2_photo = False
+if len(sys.argv) > 5: include_M2_photo=True
 
 # Run the binary
 # run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
-run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
+run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=include_M2_photo)
 
 
 
