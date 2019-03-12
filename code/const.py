@@ -2,7 +2,7 @@ import numpy as np
 
 # Constants in cgs
 Msun = 1.989e33
-Rsun = 6.95e10
+Rsun = 6.955e10
 G = 6.674e-8
 secday = 3600.0*24.0
 secyer = 3600.0*24.0*365.25

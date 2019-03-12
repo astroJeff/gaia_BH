@@ -85,7 +85,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     AL_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
     AL_err *= 1.0e3  # in mas, not asec
 
-    if include_M2_photo: G_mag_obs = None
+    if not include_M2_photo: G_mag_obs = None
 
     # Calculate observed positions
     ra_obs, dec_obs = get_pos_obs(p, t_obs, obs_angle, AL_err)
@@ -118,7 +118,7 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, 
     I_set = I + 1.0e-5*np.random.normal(size=nwalkers)
     tau_set = tau + 1.0e3*np.random.normal(size=nwalkers)
     e_set = e + 1.0e-6*np.random.normal(size=nwalkers)
-    P_set = P * (1. + 0e-3*np.random.normal(size=nwalkers))
+    P_set = P * (1. + 1e-3*np.random.normal(size=nwalkers))
     M1_set = M1 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     M2_set = M2 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     distance_set = distance * (1. + 1.0e-6*np.random.normal(size=nwalkers))
