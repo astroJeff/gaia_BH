@@ -162,7 +162,7 @@ def get_prior(p):
     # print("Here 9")
     if M2 < 0.0 or M2 > 20.0*c.Msun: return -np.inf
     # print("Here 10")
-    if distance < 0.0 or distance > 2000.0: return -np.inf
+    if distance < 0.0 or distance > 20000.0: return -np.inf
     # print("Here 11")
     if pm_ra < -1.0e4 or pm_ra > 1.0e4: return -np.inf
     # print("Here 12")
