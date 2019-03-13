@@ -169,12 +169,16 @@ def get_prior(p):
     if pm_dec < -1.0e4 or pm_dec > 1.0e4: return -np.inf
     # print("Here 13")
 
+    # Log flat priors on mass
+    lp -= np.log(M1/c.Msun)
+    lp -= np.log(M2/c.Msun)
+
     # Prior on inclination angle
-    lp = lp + np.log(np.sin(I)/2.0)
+    lp += np.log(np.sin(I)/2.0)
 
     # Distance prior Lutz-Kelker bias
     distance_max = 20.0e3  # Maximum distance of 20 kpc
-    lp = lp + np.log(3.0 * distance**2 / distance_max**3)
+    lp += np.log(3.0 * distance**2 / distance_max**3)
 
     return lp
 
