@@ -13,4 +13,7 @@ code/*.c
 code/*.h
 code/skycalc
 code/skycalc_parallax
+code/dist*
+code/*.old
+code/run*
 code/*.so
