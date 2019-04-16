@@ -1,0 +1,303 @@
+%% Using AASTeX version 6.1
+\documentclass[twocolumn,tighten]{aastex61}
+\bibliographystyle{aasjournal}
+%\pdfoutput=1 %for arXiv submission
+
+\usepackage{amssymb}
+\usepackage{array,multirow}
+\usepackage{comment}
+
+\renewcommand*{\sectionautorefname}{Section} %for \autoref
+\renewcommand*{\subsectionautorefname}{Section} %for \autoref
+\newcommand{\gyr}{{\rm{Gyr}}}
+\newcommand{\myr}{{\rm{Myr}}}
+\newcommand{\msun}{{M_\odot}}
+\newcommand{\rsun}{{R_\odot}}
+\newcommand{\lsun}{{L_\odot}}
+\newcommand{\au}{{\rm{AU}}}
+\newcommand{\pc}{{\rm{pc}}}
+\newcommand{\henon}{{H\'enon}}
+\newcommand{\metal}{{\rm{Z}}}
+\newcommand{\kpc}{{\rm{kpc}}}
+\newcommand{\rcobs}{{r_{c,\rm{obs}}}}
+\newcommand{\rhl}{{r_{\rm{hl}}}}
+\newcommand{\Sigmacobs}{{\Sigma_{c,\rm{obs}}}}
+\newcommand{\popone}{{\tt{Pop1}}}
+\newcommand{\poptwo}{{\tt{Pop2}}}
+\newcommand{\Lto}{{L_{\rm{cut}}}}
+\newcommand{\Deltarfifty}{{\Delta_{r50}}}
+\newcommand{\Deltaa}{{\Delta_A}}
+\newcommand{\nbh}{{N_{\rm{BH}}}}
+\newcommand{\ncluster}{{N_{\rm{cluster}}}}
+\newcommand{\rlim}{{r_{\rm{lim}}}}
+\newcommand{\nrec}{{n_{\rm{rec}}}}
+\newcommand{\ninject}{{n_{\rm{inj}}}}
+\newcommand{\pmsigma}{\pm 1\sigma}
+\newcommand{\gaia}{{\it Gaia} }
+\newcommand{\cosmic}{{\texttt{cosmic} }}
+\newcommand{\kps}{{{\rm km\ s}^{-1}}} 
+\newcommand{\days}{\rm{day}}
+\newcommand{\ecc}{\rm{ecc}}
+\newcommand{\yr}{\rm{yr}}
+\newcommand{\ms}{\rm{ms}}
+\newcommand{\logg}{$\rm{log\,g}$}
+\newcommand{\TESS}{\italic{TESS}}
+
+\newcommand{\bse}{\texttt{BSE}}
+
+\newcommand{\jeff}[1]{\textbf{\color{teal} Jeff: #1}}
+
+\newcommand{\katie}[1]{\textbf{\color{purple} Katie: #1}}
+
+\shorttitle{Astrophysical Origin of 2M05215658+4359220}
+\shortauthors{Breivik et al. }
+
+
+\begin{document}
+\title{Constraining Black Hole Formation with 2M05215658+4359220}
+
+\author[0000-0002-9660-9085]{Katelyn Breivik}
+\affiliation{Canadian Institute for Theoretical Astrophysics, University
+of Toronto, 60 St. George Street, Toronto, Ontario, M5S 1A7,
+Canada}
+%\affiliation{Center for Interdisciplinary Exploration \& Research in Astrophysics (CIERA), Northwestern University, IL 60202, USA}
+
+\email{kbreivik@cita.utoronto.ca}
+
+\author[0000-0002-3680-2684]{Sourav Chatterjee}
+\affiliation{Tata Institute of Fundamental Research, Division of Astronomy and Astrophysics, Homi Bhaba Road, Navy Nagar, Colaba, Mumbai, 400005, India}
+%\affiliation{Center for Interdisciplinary Exploration \& Research in Astrophysics (CIERA), Northwestern University, IL 60202, USA}
+%\affiliation{Physics \& Astronomy, Northwestern University, IL 60202, USA}
+\email{chatterjee.sourav2010@gmail.com}
+
+\author[0000-0001-5261-3923]{Jeff J. Andrews}
+\affiliation{Foundation for Research and Technology-Hellas, 
+100 Nikolaou Plastira St., 
+71110 Heraklion, Crete, Greece}
+\affiliation{Physics Department \& Institute of Theoretical \& Computational Physics, 
+P.O Box 2208, 
+71003 Heraklion, Crete, Greece}
+\email{andrews@physics.uoc.gr}
+
+\begin{abstract}
+People have observed XX binary. This is the first of its kind observed. Using state-of-the-art population Synthesis we show that the Milky Way naturally produces binaries like this via predominantly YY channel. We further find that the Milky Way likely has ZZ number of these systems. The actual yield depends weakly/strongly on blah blah assumptions on BH natal kicks, and SFR history of the Milky Way. We also find that these binaries should be natural targets of \gaia at its design sensitivity. 
+\end{abstract}
+
+\keywords{}
+
+\section{Introduction}\label{S:intro}
+%
+
+Recent discoveries of merging binary black holes (BBHs) by the LIGO-Virgo observatories \citep[e.g.,][]{Abbott_GW150914,Abbott_O1,Abbott_GW151226,Abbott_GW170104,Abbott_GW170608,Abbott_GW170814} have reignited widespread interest in the astrophysical origins of these sources \citep[e.g.,][]{Abbott_astrophys}. One of the major uncertainties in interpreting the observational results and the creation of predictive models for the rate of mergers as well as the distribution of expected component properties can be directly attributed to the lack of constraints on quantities related to BH-formation physics, such as their mass function and kick distribution at birth \citep[e.g.,][]{Chatterjee2017_uncertainties}. Theoretical modeling of the death throes of a massive star is notoriously difficult and numerical simulations are not yet at a stage to provide strong constraints. 
+(\jeff{Let's add a reference here. Maybe to Fryer, or Woosley or Heger papers.})
+At the same time, dark remnants are observationally challenging to discover, hence, it is hard to infer strong constraints from the limited number of identified stellar BHs, identified in accreting systems via X-ray and radio emissions. %WORKING HERE
+%\citep[e.g.,][]{}. 
+Thus, finding and characterizing black holes and their properties is of high importance for several branches in astrophysics. 
+
+In addition to the small number of detections, the distribution of properties also suffer from severe selection biases since, traditionally, only BHs in mass-transferring systems could be detected via X-ray and radio emissions. The possibility of identifying BHs in detached binaries was discussed nearly 50 years ago by \citet{trimble1969}, who provide a list of single-line spectroscopic binaries with large mass functions. Interestingly, black holes in detached binaries are beginning to be discovered inside star clusters \citep{2018MNRAS.475L..15G} as well as in the field \citep{Thompson2018} by radial velocity monitoring of their luminous companions. However, all of these methods pose challenges to significantly increase the number of BH detections, since each detection is observationally expensive, typically requiring significant time on large-aperture telescopes. 
+
+
+\citet{torres2007} used the astrometric orbit determined by {\it Hipparcos} to constrain the nature of a suspected BH in HR 6046, a single-line spectroscopic binary with a six-year orbital period, ultimately demonstrating that the companion was a less-luminous giant star rather than a hidden BH. Nevertheless, it has been demonstrated by several groups that \gaia has the astrometric precision to discover black holes with detached luminous companions (LCs) by astrometrically resolving the orbital motion of the luminous companion in the sky plane \citep{Breivik2017_gaia,Mashian2017_gaia,Yamaguchi2018_gaia,Yalinewich2018_gaia}. While the studies disagree on the expected yield of detached BH--LC binaries during the nominal \gaia survey duration, they all agree that such binaries do exist and that \gaia should detect them. These studies further agree that variations in BH formation physics lead to observable differences in the population of BH--LC binaries observed by \gaia; with a large enough sample, \gaia\ can constrain details of the BH formation process. Most recently, it has also been suggested that BHs with luminous companions in detached systems may also be discovered via photometric variations of the luminous companions using, for example, \TESS\ data \citep{Masuda2018_TESS}.
+In addition, the region of the parameter space \gaia\ and \TESS\ is expected to probe is very different from the parameter space probed by X-ray, radio, or gravitational waves which makes the \gaia-detectable population an exciting prospect for both increasing the number of known stellar BHs, as well as probing a different region of the parameter space for BH binaries \citep[e.g.,][]{Breivik2017_gaia}. 
+
+
+The recent discovery by \citet{Thompson2018} that 2M05215658$+$4359220 is a giant star (GS) companion to a dark remnant in a $83.2\,\days$ orbit presents the strongest case to date of for BH--LC binary in the Milky Way. \citet{Thompson2018} showed that radial velocity measurements and photometric variations of 2M05215658$+$4359220 are similar and suggested the similarity is indicative of tidal locking of the system. In this case, the photometric variability comes from ellipsoidal variations and spots. These assumptions, combined with a distance measurement from \gaia\ allow \citet{Thompson2018} to constrain $\sin\ i$, typically unknown in RV measurements. Based on these assumptions, \citet{Thompson2018} estimate the dark companion's mass to fall within the range $2.5\,\msun<M_{\rm{rem}}<5.8\,\msun$. Given these constraints, 2M05215658$+$4359220 may be the first of a completely new class of BH binaries soon to be discovered by \gaia. The primary goal of this paper is to understand in detail the astrophysical formation channel for detached BH binaries similar in properties to 2M05215658$+$4359220 and investigate the potential for 2M05215658$+$4359220 to place constraints on BH formation in binary systems.
+%The detected orbital period is well within the \gaia-detectable limits \citep[e.g.,][]{Thompson2018,Breivik2017_gaia}.  
+%Most recently 
+%We further demonstrate how well \gaia data can put constraints on the binary properties and as a result, the nature of the compact object. 
+%From RVs alone, the unknown inclination angle prevents the determination of the component masses.
+%From RVs alone there is a $\sin i$ degeneracy, which makes it impossible to derive component masses alone. 
+%However, since for  
+
+In \autoref{S:methods} we describe our population synthesis code used to generate populations of binaries formed in the Milky Way. In \autoref{S:results} we describe the dominant formation channels for BH binaries with similar properties to 2M05215658$+$4359220 and discuss how 2M05215658$+$4359220 may be used to constrain BH formation. In \autoref{S:discussion}, we discuss tension between existing constraints and finish with a summary of our key results in \autoref{S:Conclusion}.
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.95\textwidth]{SFH_update.pdf}
+    \caption{(\jeff{Suggest that rather than ``FIRE" in left panel, you say something like ``all stars"})Distributions of birth time and metallicity based on galaxy {\bf{m12i}} in the Latte simulation suite. The left-most panel shows the distribution from galaxy {\bf{m12i}}, while the middle and right-most panels show the metallicity and birth time, with the simulation initialized to $T_{\rm{birth}}=0$, for the populations of BH--GS binaries that survive to the present day from the rapid and delayed SN models.}
+    \label{fig:SFH}
+\end{figure*}
+
+
+
+%
+\section{Simulating Milky Way BH binaries}
+\label{S:methods}
+
+Building on the methods of \cite{Breivik2017_gaia}, we use the population synthesis code: \cosmic to  simulate a realistic Milky Way population of binary systems of BHs orbiting a luminous giant star companion (BH--GS). In contrast to our previous work, we adopt a metallicity-dependent Milky Way star formation history, as done in \cite{Lamberts2018},  based on galaxy {\bf{m12i}} in the Latte simulation suite. The Latte suite of FIRE-2 cosmological, zoom-in, baryonic simulations of Milky Way-mass galaxies \citep{Wetzel2016}, part of the Feedback In Realistic Environments (FIRE) simulation project, were run using the Gizmo gravity plus hydrodynamics code in meshless, finite-mass mode \citep{Hopkins2015} and the FIRE-2 physics model \citep{Hopkins2018}. 
+
+As in \cite{Breivik2017_gaia}, we assume standard parameter distributions to initialize our binary population. We assume initial primary masses are distributed according to \citet{Kroupa2001}. We assume a primary mass dependent binary fraction following \citet{vanHaaften2013}, which was based on observations summarized in \citet{Kouwenhoven2009, Kraus2009, Sana2012}. Secondary masses are chosen based on uniformly distributed mass ratios \citep{Mazeh1992, Goldberg1994}. Orbital periods are distributed uniformly in log-days \citep{Abt1983}, where the upper bound is $10^5\,\rsun$ and the lower bound is set such that the primary star's radius is less than half of the Roche-lobe radius, consistent with \cite{Dominik2012, Dominik2013}. Finally, we assume a thermal initial eccentricity distribution \citep{Heggie1975}. 
+
+\cosmic uses the binary stellar evolution code \bse\ \citep{Hurley2002} to evolve an initialized population of binaries to the present day. We note that since \bse\ limits binary metallicities to between $0.0001 < Z < 0.03$, we artificially force all metallicities taken from galaxy {\bf{m12i}} to fall within this range. For the purpose of scaling our simulations to the Milky Way, we track the total simulated mass, including single and binary stars, in our populations. We then scale the number of BH--GS binaries by the total simulated mass to the total mass of stars formed in galaxy {\bf{m12i}}: $M_{\rm{FIRE}}=2.7\times10\,\msun$. (\jeff{Missing an exponent on the 10 here.})
+
+The mass derivations in \citet{Thompson2018} suggest the possibility of 2M05215658+4359220's companion being a BH that falls within the observed `mass gap' region of BHs with masses $\lesssim\,5\,M_{\odot}$ \citep{Ozel2010, Farr2011}. Based on this, we investigate two supernova (SN) mechanism models, from \cite{Fryer2012}, which produce a BH mass gap (`rapid') or do not produce BH mass gap (`delayed'). In both models there are three phases of the SN explosion: the stellar collapse and core bounce, the convective engine, and the post-explosion fallback. In both models, a convective region forms after the core bounce from a shock that radiates out from the proto compact object core. A SN explosion occurs if the energy stored in this convective region exceeds the energy of the infalling stellar material. The difference between the two models lies in how instabilities grow in the convective region formed by the shock from the core bounce between the proto compact object core and the stellar envelope. The energy stored in the convective region falls as the accretion rate onto the core decreases; thus the energy stored in the convective region decreases with time since coure bounce.
+In the rapid model, instabilities grow on short timescales of less than $250\,\ms$ after core bounce. Over these short timescales, the energy stored in the convective region remains high and results in higher energy SN explosions. This results in a distinct gap between the masses of neutron stars and BHs (see Fig. 2 of \citet{Fryer2012}). Conversely, the delayed model allows convective instabilities to grow over a wider range of timescales and leading to a broader spread in SN explosion energies and a continuous distribution of compact object masses from neutron stars to BHs.   
+
+We assume that BH's are born with a natal kick that is drawn from a Maxwellian distribution with $\sigma=265\,\rm{km/s}$ \citep{Hobbs2005}, which is then modulated by the amount of mass that falls back onto the BH during formation \citep{Fryer2012}. (\jeff{Rather than ``modulated", maybe reduced? Then cite a reference where an interested reader can find the prescription.}) We employ the $\alpha\lambda$ common envelope prescription where $\alpha=1.0$ is the common envelope efficiency and $\lambda$ is the binding energy of the stellar envelope, determined according to the \bse\ default prescription which is described in the Appendix of \citet{Claeys2014}. 
+
+%
+\section{Results}
+\label{S:results}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.47\textwidth]{formation_channels.pdf}
+    \caption{Evolutionary channels to form BH--GS binaries similar to 2M05215658+4359220, with relative rates of each evolutionary stage. System from both the rapid and delayed models begin as massive with a lower mass stellar companion in a non-interacting orbit. All formation scenarios predict the system went through a common envelope, followed by a SN, producing a BH--LC binary. Depending on the mass-dependent strength and direction of the BH natal kick, the BH-LC orbit can be modified from the post common envelope orbit. The LC then evolves off of the main sequence and results in a BH--GS binary at present. We deem a BH--GS to be similar to 2M05215658+4359220 if it has $P_{\rm{orb}}<5\,yr$ and $\rm{ecc}=0$.}
+    \label{fig:formation_channel}
+\end{figure}
+\subsection{Formation Channels}
+\label{subS:formation_channels}
+
+Our simulations produce two populations of BH--GS binaries that are representative of a Milky Way population. We scale our simulated population by the total initialized mass to find the total number of BH--GS binaries in the Milky Way at present. The results of our simulations are summarized in Figure\,\ref{fig:formation_channel}, which shows the formation channels that produce BH--GS binaries similar to 2M05215658+4359220 for our rapid and delayed models. While we find that the vast majority of BH--GS binaries evolve without undergoing a common envelope phase, any system that has an orbital period less than $5\,\yr$ has undergone a common envelope regardless of the SN mechanism. The differences between the formation channels for our rapid and delayed model are directly linked to the SN mechanism. Broadly, the rapid model produces fewer, but more massive BHs than the delayed model for the reasons detailed in Section\,\ref{S:methods}. As discussed in \citet{Breivik2017_gaia}, this leads to relatively weaker BH natal kicks due to fallback, and thus relatively fewer systems with $P_{\rm{orb}}>5\,\yr$ or $\ecc>0$ than in the delayed model. Nevertheless, we find that the delayed model produces more 2M05215658+4359220-like BH--GS binaries, which we define to have $0.5\,\days<P_{\rm{orb}}<5\,\yr$ and $\ecc=0$.
+
+Figure \ref{fig:porb_mass} shows the distribution of orbital period vs BH mass from our simulations as well as the derived masses for the remnant companion to 2M05215658+4359220. The masses of 2M05215658+4359220 and it's dark companion are derived in two separate ways: one combining radial velocity, \logg\, temperature constraints imposed by spectroscopic observations with MIST single star SED fits, and one that leaves \logg\ as a free parameter. The masses inferred using the \logg\ constraints are $M_{\rm{CO}}\simeq3.2^{+1.1}_{-0.4}\,\msun$ and $M_{\rm{GS}}\simeq3.0^{+0.6}_{-0.5}\,\msun$. The masses inferred without the \logg\ constraints are $M_{\rm{CO}}\simeq5.5^{+3.2}_{-2.2}\,\msun$ and $M_{\rm{GS}}\simeq2.2^{+1.0}_{-0.9}\,\msun$.  
+
+Both populations are broadly separated in orbital-period space at roughly $P_{\rm{orb}}\simeq5\,\yr=1825\,\days$, which is coincidental with the orbital period region of \gaia's sensitivity. We note that the actual lower period cutoff for \gaia's sensitivity is dependent on the binary's distance and orientation, as well as the cadence of observation. While some studies (e.g. \cite{Yamaguchi2018_gaia, Yalinewich2018_gaia}) assume conservative lower bounds of $P_{\rm{orb}}=70\,\days$, it is not yet well-studied how degeneracies caused by aliasing at shorter periods can be broken.
+
+As described in Section\,\ref{subS:formation_channels}, the division of the longer and shorter orbital period populations is largely the result of if the the BH--GS progenitor underwent a common envelope evolution. The evolution for systems that do not go through a common envelope but survive to the present day largely proceeds as if the binary components evolve in isolation. This leads to more massive BH progenitors and thus more massive BHs.
+
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.95\textwidth]{distributed_CO_mass_porb_FIRE.pdf}
+    \caption{Distribution of orbital period vs BH mass resulting from each of our simulations. Note that the lower limit on the BH mass is artificially set to $3\,\msun$ in our binary evolution models. The left panel shows the populations evolved with the rapid SN prescription while the right panel shows the populations evolved with the delayed SN prescription. Contours show the overall expected number in the Milky Way. The black and orange data points show the observed orbital period ($P_{\rm{orb}}=83.2\,\days$) and derived masses for the two BH mass solutions provided by \cite{Thompson2018}. The shaded blue region with solid borders shows a rough guideline for the orbital periods \gaia is sensitive to with the upper limit set by the mission lifetime of $5\,\yr$ and the illustrative lower limit set to $0.5\,\days$ based on the average minimum orbital period deemed observable by \gaia in \citet{Breivik2017_gaia}.}
+    \label{fig:porb_mass}
+\end{figure*}
+
+The effect of different SN mechanisms is most apparent in the BH mass for systems with $P_{\rm{orb}}\lesssim5\,\yr$ which all go through a common envelope evolution. Since the common envelope produces BH progenitors with similar masses in both models, the difference in BH mass distribution is a direct consequence of the SN mechanism model choice. Systems evolved with the delayed model are limited to a lower bound of $3\,\msun$ (chosen as the cutoff between NS and BH), while the rapid model only produces BH masses in excess of $\sim5\,\msun$. This is particularly important given the low BH masses ($\sim2-5\,\msun$) derived in \cite{Thompson2018}.
+
+
+\subsection{Using 2M05215658+4359220 to constrain BH formation models}
+\label{subS:BH_formation}
+
+Throughout the rest of the paper, we restrict our attention to the sub-population of systems with parameters that fall within reasonable bounds of 2M05215658+4359220's parameters. In particular, we select systems containing a BH in a circular orbit with a giant star (BH--GS) with orbital periods within $50$ days of 2M05215658+4359220's $83.2\,\days$ orbital period. 
+
+Figure\,\ref{fig:mass_mass} compares our simulations to the derived masses of 2M05215658+4359220 and it's remnant companion from \cite{Thompson2018}. The two derived masses, along with distributions of BH and GS masses from our simulations for each SN model are shown in the blue and orange shaded regions. We also plot the systems in our sub-population that contains circular binaries with orbital periods within $50$ days of 2M05215658+4359220's orbital period. The over density of simulated systems where $M_{\rm{GS}}\gtrsim2\,M_{\odot}$ is dominated by binaries formed in the last $1.5\,\gyr$ where the GS companion is undergoing core helium burning, with a small number of GS companions on the first giant branch or asymptotic giant branch. Systems with lower GS masses are dominated by binaries formed in the range of $1.5\,\gyr$ to $10.0\,\gyr$ with GS companions on the first giant branch.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.45\textwidth]{distributed_masses_FIRE.pdf}
+    \caption{Shaded regions show the $1\sigma$, $2\sigma$, and $3\sigma$ distributions of BH mass vs GS mass for the full simulated population for the delayed (orange) and rapid (blue) SN prescriptions, while the points of the same colors show the BH mass vs GS mass of systems in the sub-populations discussed in Section\,\ref{subS:BH_formation} The black error bars show limits on the BH and GS mass derived in \citet{Thompson2018}, with the triangle marker showing constraints placed without a $log\,g$ measurement and circle marker showing constraints including a $log\,g$ measurement.}
+    \label{fig:mass_mass}
+\end{figure}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.85\textwidth]{x_Ray_lum_vs_porb_days_FIRE.pdf}
+    \caption{X-ray luminosity vs orbital period expected from the accretion of the GS wind by the BH for our sub-population of binaries similar to 2M05215658$+$4359220 (See Section \ref{S:discussion} for details). The majority of our simulated BH--GS binaries (left panel) produce X-ray luminosities higher than the X-ray upper limit from \citet{Thompson2018} of $\sim$10$^{32}$ erg s$^{-1}$. However, the X-ray upper limit is consistent with certain NS accretors (right panel).}
+    \label{fig:x_rays}
+\end{figure*}
+
+Both derived masses from \citet{Thompson2018} are broadly consistent with the results of our simulations. The constraints placed without \logg\ measurements (triangle marker in Figure\,\ref{fig:mass_mass}) are consistent with both our rapid and delayed SN models. However, we note that the tighter constraints placed by imposing a \logg\ measurement (circle marker in Figure\,\ref{fig:mass_mass}) are inconsistent, by $3\sigma$, with our rapid SN mechanism model, regardless of whether population cuts are placed. If we restrict our attention to systems with similar orbital periods to 2M05215658+4359220, we find that the mass constraints without \logg\ measurements are consistent with BH--GS binaries a with a first giant branch or core helium burning GS companion for both SN mechanism models. Only systems with a GS companion undergoing core helium burning or on the asymptotic giant branch are consistent with mass constraints placed with a \logg\ measurement. The discussion above suggests that \emph{future observations that confirm the mass of 2M05215658+4359220 could rule out the rapid SN mechanism, as well as the mass gap between BHs and NSs}.
+
+
+
+
+\section{Discussion}
+\label{S:discussion}
+%\authorcomment1{All is not rosy. There are significant discrepancies in the measured giant masses. If this is wind-fed system, then X-ray luminosity is too low, etc. Is it possible to say anything about the BH or NS nature of the primary from the X-ray upper limit? Believing that the nature if a BH, and the mass estimate is not too off, can there be a limit on the wind mass loss or velocity? Are these estimates reasonable for giants? Compare other wind models?? I have no idea of the literature on this. }
+%
+\subsection{X-ray Luminosity Puzzle}
+\label{SubS:X_rays}
+\katie{I redid the calculation following Frank, King, and Raine exactly using the equation just after 4.39 at the bottom of page 75. This assumes that the wind velocities are just the escape velocity at the surface of the GS and that they dominate the orbital speeds (which they do by at least a factor of 1e3). As Jeff found, the BH accretion efficiency is between ~1\% and 15\% for the BHs with much lower accretion efficiency. The new figure has a few systems with X-ray luminosities consistent with a non detection, but the majority should have still been detected. I've updated the text to reflect this. ***ONE QUESTION: does the Frank, King and Raine calculation take into account an X-ray vs bolometric luminosity correction? Could the correction decrease our luminosity by an order of magnitude? This is temperature dependent right, maybe based on the wind velocity?}
+
+We note that one of the predictions of our population synthesis model is that giant stars in systems like 2M05215658$+$4359220 are characterized by wind mass loss, from which the BH companion can accrete. Following the prescription outlined in \citet{accretion_power2002} for wind accretion using Bondi-Hoyle-Littleton accretion theory, we can derive the X-ray luminosity (L$_{\rm x}$) expected from a particular BH--GS binary. For instance, if we place the well-studied, nearby star $\alpha$ Boo (Arcturus; which has which has properties similar to the giant star in 2M05215658$+$4359220) in an $83.2$ day orbit with a 3$\msun$ BH, we derive an L$_{\rm x}$ of $\sim$10$^{35}$ erg s$^{-1}$, nearly four orders of magnitude higher than the X-ray upper limit of 7.7$\times$10$^{31}$ erg s$^{-1}$ calculated from the {\it Swift} non-detection by \citet{Thompson2018}. 
+
+To further investigate this, we simulated a population of NS-GS binaries using the same formalism described in Section\,\ref{S:methods} for both the rapid and delayed SN mechanism models. We then applied the accretion formalism of \citet{accretion_power2002} to our simulated BH--GS and NS-GS binaries. Figure\,\ref{fig:x_rays} shows the X-ray luminosity, L$_{\rm x}$, vs orbital period for our simulated BH--GS and NS-GS binaries with orbital periods within $50$ days of  2M05215658$+$4359220. The left panel shows that the majority BH--GS binaries in our specified orbital period range produce L$_{\rm x}$ above the X-ray upper limit (indicated by the grey region). Alternatively, the right panel of Figure \ref{fig:x_rays} shows that our simulated NS-GS binaries produce substantially lower L$_{\rm x}$, making them compatible with the {\it Swift} non-detection. Furthermore, the relatively low accretion rates may place these systems within the propeller regime, leading to much lower L$_{\rm x}$ than our simplified accretion model predicts \citep{illarionov1975, ghosh1979}. 
+
+While these model results suggest that the L$_{\rm x}$ upper limit is inconsistent with a BH accretor, wind accretion in binaries is a notoriously difficult problem \citep{theuns1996, de_val-borro2017} that is complicated by clumping \citep{bozzo2016}, small-scale instabilities \citep{manousakis2015}, and the back reaction of accretion onto the donor star's atmosphere \citep{sander2018}. Furthermore, \citet{Thompson2018} find that stellar models struggle to reproduce other features observed 2M05215658$+$4359220. Thus the non-detection of X-rays from this system presents 2M05215658$+$4359220 as an  interesting case study for testing wind accretion models.
+
+%Detailed study of 2M05215658$+$4359220 in the context of wind accretion, as well as astrometric observations by \gaia, will help resolve the nature of the dark companion in 2M05215658$+$4359220.
+
+%\subsection{Future constraints}
+%\label{SubS:mass_constraints}
+%The strongest constraint on the dark remnant orbiting 2M05215658$+$4359220 will come from better dynamical mass measurements. The radial velocities obtained in \citet{Thompson2018} combined with Gaia's precision astrometry will reveal    2M05215658$+$4359220 will be observed $\sim80$ times over the nominal Gaia mission according to the Gaia Observation Forecast Tool \footnote{https://gaia.esac.esa.int/gost/},. 
+
+%\katie{Not totally sure what to put in here yet:
+%Combination of Gaia astrometry and APOGEE/TRES radial velocities will for sure break inclination degeneracy, which will give excellent mass constraints right? Maybe we combine these two subsections to just a Discusion section?}
+
+\section{Conclusion}
+\label{S:Conclusion}
+We have shown that BH--GS binaries similar to 2M05215658$+$4359220 are naturally produced in binary population synthesis simulations for the Milky Way. While several formation channels can produce BH--GS binaries in general, the dominant formation channel for circular BH--GS binaries in orbits similar to 2M05215658$+$4359220 requires a common envelope evolution. We find that the mass of the BH is a direct consequence of the SN mechanism used in binary evolution models, thus a strong constraint on the remnant companion to 2M05215658$+$4359220 could help to constrain models for the SN mechanism and BH formation. Furthermore, if the remnant to 2M05215658$+$4359220 is indeed confirmed to be a BH with $M_{\rm{BH}}\sim3\,\msun$ the existence of the BH mass gap can be ruled out all together. Finally, we introduced a tension between the non-detection of X-rays from 2M05215658$+$4359220 by \textit{Swift} and standard wind accretion theory for our population of BH--GS binaries. Future observations by \gaia\ are certain to improve the constraints of the mass of 2M05215658$+$4359220 and its dark companion.
+
+
+\begin{thebibliography}{}
+
+
+\bibitem[Ag\"ueros et al.\,(2009a)]{agueros09a} Ag\"ueros, M.~A., Camilo, F., Silvestri, N.~M., Kleinman, S.~J., Anderson, S.~F., Liebert, J.~W.\ 2009a, \ap
+j, 700, 123
+
+\end{thebibliography}
+
+%\bibliography{ref}
+
+\begin{comment}
+Giant stars typically have large mass loss rates \citep[$\dot{M}>10^{-9}$;][]{de_jager1988}, which are realized as stellar winds that a dark companion such as a NS or BH can accrete. Such systems may be observed as high mass X-ray binaries, of which many are wind-fed and detached, with orbital periods similar to 2M05215658$+$4359220 \citep[e.g., RX J0812.4$-$3114, $P_{\rm orb}=$81\,\days;][]{Liu2006}. The observed X-ray upper limit of $\simeq$2$\times$10$^{-2}\lsun$ places strict limits on the accretion of a putative BH in 2M05215658$+$4359220: following the prescription outlined in \citet{accretion_power2002} for wind accretion, assuming a 3$\msun$ BH accretion from a 3$\msun$ giant star with a wind velocity of 50$\kps$, the BH will accrete $\approx$15\% of the mass lost from the giant star. Assuming a bolometric correction of 0.8, an efficiency factor of 0.5, and an accretion radius of 3 Schwarzschild radii, the X-ray upper limit translates into an upper limit on the giant star's mass loss of 5$\times 10^{-14}\msun\,\yr^{-1}$. For comparison, $\alpha$ Boo (Arcturus), which has similar properties as those derived by \citet{Thompson2018} for giant star in 2M05215658$+$4359220, ($T_{\rm eff}=$4250 K, $R=$27 $\rsun$, $L=$170 $\lsun$, $M=$1.1 $\msun$) has a wind mass loss rate of $2\times 10^{-10}$ $\msun\,\yr^{-1}$ and a wind velocity of 43$\pm$4 $\kps$. Using the wind parameters of $\alpha$ Boo, we derive an expected X-ray luminosity of $\sim$10$^35$ erg s$^{-1}$, nearly four orders of magnitude higher than the X-ray upper limit derived by {\it Swift}.
+
+
+This difference may seem to be problematic for the interpretation that the dark companion in 2M05215658$+$4359220 is a BH. However, we note that wind accretion is a (\jeff{too colloquial?}) notoriously difficult problem that is complicated by clumping \citep{bozzo2016} and small-scale instabilities \citep{manousakis2015}. Furthermore, the above calculation is strictly only applicable in the so-called ``fast-wind" regime, where the wind velocity is significantly larger than the orbital velocity. The mass accretion rate in the opposite limit, the ``slow-wind" regime, is still unclear: while three-dimensional smooth-particle hydrodynamic simulations by \citet{theuns1996} show that the actual mass accretion rate is a factor of $\sim$10 smaller than the expectation from Bondi-Hoyle accretion theory, simulations by \citet{de_val-borro2017} find accretion rates 20-50\% larger than the Bondi-Hoyle-Littleton accretion rate, albeit for a white dwarf accretor. More recent simulations by \citet{sander2018}, taking into account the back-reaction from accretion-produced X-rays on the donor's stellar atmosphere, in the case of Vela X-1, find a mass accretion rate in agreement with the Bondi-Hoyle-Littleton expectation. If the dark object in 2M05215658$+$4359220 is indeed a BH, as suggested by \citet{Thompson2018}, it places stringent limits on wind accretion and is worthy of further study in that context.
+% Nevertheless, well-studied examples of black holes accreting from companions with such large orbits do not exist. 
+%One might naively expect that in the ``slow-wind" regime, a compact accretor may sweep up a large fraction of the giant star's wind. Indeed, this expectation seems to be borne out by recent three-dimensional hydrodynamical simulations by \citet{de_val-borro2017}. These authors find that a white dwarf accreting from slower velocity winds (20-50 $\kps$) will capture 5-20 per cent of the mass loss by the giant star. On the other hand, 
+\authorcomment1{Jeff: If you assume that it is in the slow wind regime, then what will be the X-ray luminosity? Note that for a $P=81$ day binary with $m_1=m_2=3\,M_\odot$, the circular $v\sim90\,km/s$. Given $v_{wind}\sim50\,km/s$, it is not fast wind by any means. Also, naively I would think that slow wind will enhance $L_X$, but don't know enough. Jeff, what do you think? }
+(\jeff{It's not well understood. I included a couple extra references above. Feel free to parse/rephrase/delete as necessary.})
+
+Alternatively, if the dark object is a NS, the lack of X-ray emission can naturally be explained. For inflowing material onto a NS, if the NS's spin period is shorter than the period of a Keplerian orbit at the Alfv{\' e}n radius (the radius at which the pressure from the NS's magnetic field equals the ram pressure of the accreting material), the accretion is in the propeller regime and a centrifugal barrier prevents any material from accreting \citep{illarionov1975, ghosh1979}. Instead, once reaching the Alfv{\' e}n radius, any inflowing material will be channeled away from the system along the NS's magnetic field lines, and no X-rays will be produced. Astrometric observations by \gaia should help resolve the nature of the dark companion in 2M05215658$+$4359220.
+
+
+
+
+\section{Wind Accretion Equation Dump}
+
+The compact object companion in 2M05215658$+$4359220 accretes at rate ($M_{\rm acc}$) at a rate proportional to the wind mass lost from the giant star ($\dot{M}_{\rm wind}$), according to Bondi-Hoyle accretion:
+\begin{equation}
+\dot{M}_{\rm acc} = \frac{r^2_{\rm acc}}{4 a^2} \dot{M}_{\rm wind},
+\end{equation}
+where $a$ is the orbital separation and $r_{\rm acc}$ is the accretion radius. The accretion radius is:
+\begin{equation}
+r_{\rm acc} = \frac{2 \mathcal{G} M_{\rm CO}}{v^2_{\rm rel}},
+\end{equation}
+where $M_{\rm CO}$ is the mass of the compact object and $v_{\rm rel}$ is the relative velocity between the wind and the orbital motion. For a circular binary, $v^2_{\rm rel} \approx v^2_{\rm wind} + v^2_{\rm orb}$.
+
+For a 3 $\msun$ BH companion accreting from a 3 $\msun$ giant star with a wind velocity of 50 $\kps$, the mass accretion rate is 15\% of the giant's mass loss rate. 
+
+Reimers provides the mass loss rate for giant stars:
+\begin{eqnarray}
+\dot{M}_{wind} &=& 3.5 \times 10^{-10} \eta \left( \frac{L_{\rm giant}}{200 L_{\odot}} \right) \left( \frac{g_{\rm giant}}{251 {\rm cm}\ {\rm s}^{-2}} \right) \nonumber \\
+& & \quad \times \left( \frac{R_{\rm giant}}{25 R_{\odot}} \right)^{-1} \msun\,\yr^{-1}, \label{eq:mdot_wind}
+\end{eqnarray}
+where $\eta$ is a unitless scaling parameter of order unity, typical within a factor of a few. As a comparison, $\alpha$ Boo (Arcturus) has similar properties as the giant star in 2M05215658+4359220: $T_{\rm eff} =$4250 K, $R=$27 $\rsun$, $L=$170 $\lsun$, $M=$1.1 $\msun$. Its wind mass loss rate is $2\times 10^{-10}$ $\msun,\yr^{-1}$ and wind velocity is 43$\pm$4 $\kps$.
+
+15\% of the mass loss rate adopted in Equation \ref{eq:mdot_wind} gives a mass accretion rate of 5.0$\times$10$^{-11}$ $\msun\,\yr^{-1}$. To calculate the X-ray luminosity, $L_x$, emitted from this accretion rate, we use:
+\begin{equation}
+L_x = \eta_{\rm bol} \epsilon \frac{G M_{\rm CO} \dot{M}_{\rm acc}}{r},
+\end{equation}
+where $\eta_{\rm bol}$ is the bolometric correct to determine what fraction of the radiation is released as X-rays of the detectable energies, $\epsilon$ is an efficiency factor, and $r$ is the radius at which the material accretes (typically expressed in terms of the Schwarzschild radius, $R_s$). Adopting typical values for wind accretion onto BHs, we find:
+\begin{eqnarray}
+L_x &=& 5.7 \times 10^{35} \left( \frac{\eta_{\rm bol}}{0.8} \right) \left( \frac{\epsilon}{0.5} \right) \left( \frac{M_{\rm CO}}{3 \msun} \right) \left( \frac{r}{3 R_{\rm s}} \right)^{-1} \nonumber \\
+& & \quad \times \left( \frac{\dot{M}_{\rm acc}}{3.5\times10^{-10} \msun\\,\yr^{-1}} \right)  {\rm erg}\ {\rm s}^{-1}.
+\end{eqnarray}
+Even adopting somewhat more conservative values for any of the free parameters still produces an $L_x$ orders of magnitude larger than the X-ray upper limit from {\rm Swift} of 7.7$\times$10$^{31}$ erg s$^{-1}$. For a NS accretor, with a mass of 1.4 $\msun$, we expect a somewhat lower accretion rate of 1.75$\times$10$^{-11}$ $\msun\,\yr^{-1}$, and therefore an $L_x$ of 2$\times$10$^{36}$ erg s$^{-1}$, still orders of magnitude larger than the observed X-ray upper limit.
+
+
+
+For systems with NS compact objects, the large magnetic field fundamentally alters the accretion flow. The Alfv{\' e}n radius ($r_m$), the radius at which the pressure from the NS's magnetic field equals the ram pressure of the accreting material can be calculated as:
+\begin{eqnarray}
+r_m &=& 9.0 \times 10^8 \left( \frac{\dot{M}_{\rm acc}}{1.75\times 10^{-11} \msun\,\yr^{-1}} \right)^{-2/7} \left( \frac{M_{\rm CO}}{1.4 \msun} \right)^{-1/7} \nonumber \\
+& & \quad \times \left( \frac{\mu}{10^{30} {\rm G}\ {\rm cm}^3} \right)^{4/7} {\rm cm},
+\end{eqnarray}
+where $\mu$ is the magnetic field energy density. We next calculate the orbital period of material orbiting the compact object at the The Alfv{\' e}n radius:
+\begin{equation}
+P_{\rm Alfven} = 12.6 \left( \frac{M_{\rm CO}}{1.4 \msun} \right)^{-1/2} \left( \frac{r_m}{1.6 \times 10^8 {\rm cm}} \right)^{3/2} {\rm s}.
+\end{equation}
+
+For inflowing material, if the spin period of the pulsar is shorter than the period of a Keplerian orbit at the Alfv{\' e}n radius, the accretion is in the so-called propeller regime and the centrifugal barrier prevents any material from accreting; instead, once reaching the Alfv{\' e}n radius, any inflowing material will be channeled away from the system along the NS's magnetic field lines. 
+
+We do not expect that prior accretion would have spun up the NS to ms periods. The critical pulsar spin period separating the accretion regime from the propeller regime is close to, but still an order of magnitude larger than typical non-recycled pulsar spin periods. therefore, we expect that, if the compact object in 2M05215658$+$4359220 is a NS, accretion will be in the propeller regime, and no X-rays will be produced. 
+
+In that case, the pulsar mechanism will not be quenched, and provided the NS is has not spun down beyond the death line, may be observable as a pulsar. 
+% Scott says the ATNF pulsar is too far away to be the hidden companion.
+% We note that the ATNF catalog lists a pulsar with a period of $\approx$500 ms near 2M05215658$+$4359220. Since the pulsar was detected in a drift scan, the position is not determined precisely. We recommend radio follow-up to search for Doppler shifts in the pulsar period corresponding to the 83 day orbital period of 2M05215658+4359220, in case this pulsar happens to be the hidden compact object companion in the system.
+\end{comment}
+
+\end{document}
+

@@ -3,10 +3,14 @@ docs/*.aux
 docs/*.log
 docs/*.gz
 docs/*.out
+docs/*.txt
+docs/*.cls
 notebooks/.ipynb*
 literature
 .DS_Store
 code/__pycache__
+code/*.c
+code/*.h
 code/skycalc
 code/skycalc_parallax
 code/*.so
