@@ -117,7 +117,8 @@ def run_one_M2(P_orb=100.0, M2=1.0e-3, nburn=1000, nrun=5000):
 
 
 
-def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_photo=True, include_RV=False, t_obs_filename="../data/cadence/J1102.csv"):
+def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_photo=True, include_RV=False,
+                   t_obs_filename="../data/cadence/J1102.csv", fileout=None):
     """
     Run sampler on one binary
 
@@ -166,7 +167,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
 
     # Calculate Gaia along-scan pointing precision
-    AL_err = gaia.get_single_obs_pos_err_limit(G=G_mag_obs)
+    AL_err = gaia.get_single_obs_pos_err_limit(g_mag=G_mag_obs)
     # AL_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
     AL_err *= 1.0e3  # in mas, not asec
 
@@ -189,8 +190,18 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
                                      nwalkers=128, include_RV=include_RV, t_obs_RV=t_obs_RV, RV_obs=RV_obs, RV_err=RV_err)
 
-    # Run sampler
-    sampler = run_emcee(sampler, p0, nburn=nburn, nrun=nrun)
+    # Run sampler in batches of 1000
+    batch = 1000
+    for i in range(int(nrun/batch)+1):
+
+        print(i, fileout)
+
+        sampler, p0 = run_emcee(sampler, p0, nrun=np.min([batch, nrun - i*batch]))
+
+        # Save sampler after every batch
+        if fileout is not None:
+            np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
+            np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
 
     return sampler
 
@@ -387,7 +398,7 @@ def get_RV_obs(p, t_obs_RV, RV_err=1.0):
     return RV_obs, RV_err
 
 
-def run_emcee(sampler, p0, nburn=100, nrun=1000):
+def run_emcee(sampler, p0, nrun=1000):
     """
     Run the emcee sampler
 
@@ -397,8 +408,8 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
         Initialized emcee sampler object
     p0 : numpy array
         Set of initialized walkers
-    nburn, nrun : int
-        Number of burn-in and run steps
+    nrun : int
+        Number of run steps
 
     Returns
     -------
@@ -406,17 +417,15 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
         Run emcee sampler object
     """
 
-    pos,prob,state = sampler.run_mcmc(p0, N=nburn)
+    pos,prob,state = sampler.run_mcmc(p0, N=nrun)
 
-    pos,prob,state = sampler.run_mcmc(pos, N=nrun)
-
-    return sampler
+    return sampler, prob
 
 
 
 
 
-def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False, include_RV=False, t_obs_filename="../data/cadence/J1102.csv"):
+def run_only_one(dist, M1, M2, P_orb, nrun, include_M2_photo=False, include_RV=False, t_obs_filename="../data/cadence/J1102.csv"):
     """
     Run a single binary
 
@@ -438,18 +447,19 @@ def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False, inclu
         Filename and path to observation time data
     """
 
-    # Run a single binary
-    sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
-                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=t_obs_filename)
-
     # Create the fileout string
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
     if include_M2_photo: fileout = fileout + '_photo'
     if include_RV: fileout = fileout + '_RV'
 
-    # Save sampler
-    np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
-    np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
+    # Run a single binary
+    sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
+                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo,
+                             include_RV=include_RV, t_obs_filename=t_obs_filename, fileout=fileout)
+
+    # # Save sampler
+    # np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
+    # np.save(fileout + "_acceptancefractions.npy", sampler.acceptance_fraction)
 
 
 # Binary parameters
@@ -472,4 +482,4 @@ if len(sys.argv) > 7:
 
 
 # Run the binary
-run_only_one(dist, M1, M2, P_orb, 2, 10, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=filename)
+run_only_one(dist, M1, M2, P_orb, 40000, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=filename)
