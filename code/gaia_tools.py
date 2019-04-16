@@ -9,6 +9,48 @@ from pygaia.errors.utils import averageNumberOfTransits as N_transit_ave
 
 AC_err = 612.45  # Across scan error in mas
 
+
+AL_scan_precision = None
+
+
+
+def load_interpolatio_data():
+    """
+    Function to load the interpolation function for the AL astrometric precision as a function of Gaia g mag.
+    """
+
+    global AL_scan_precision
+
+    data = np.genfromtxt("../data/theoretical_limit.csv", delimiter=',')
+
+    # Data is in mas, interpolation should be in asec
+    AL_scan_precision = interp1d(data[:,0], data[:,1]/1.0e3)
+
+
+def get_single_obs_pos_err_limit(g_mag):
+    """
+    Use the AL scan theoretical astrometric limit as the single position error.
+
+    Arguments
+    ---------
+    g_mag : float
+        Gaia g magnitude
+
+    Returns
+    -------
+    AL_scan_precision : float
+        Angular precision on the position of a star of a given magnitude (in asec)
+
+    """
+
+    global AL_scan_precision
+
+    if AL_scan_precision is None: load_interpolatio_data()
+
+    return AL_scan_precision(g_mag)
+
+
+
 def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
     """
