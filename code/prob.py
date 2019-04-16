@@ -9,7 +9,8 @@ import photometry
 
 
 
-def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err):
+def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
+                      t_obs_RV=None, RV_obs=None, RV_err=None):
     """ Calculate the natural log of the likelihood for a set of model parameters
 
     Arguments
@@ -30,6 +31,12 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G
         Gaia G band magnitude
     G_mag_err : float
         Gaia G band magnitude error
+    t_obs_RV : nd_array
+        Set of observation times for RVs (Julian Days)
+    RV_obs : nd_array
+        Set of radial velocity observations (km/s)
+    RV_err : float
+        Radial velocity measurement error (km/s)
 
     Returns
     -------
@@ -78,6 +85,23 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G
         # Calculate the log-likelihood for uncertainties in ra-dec space
         ln_likelihood += np.log(obs_astrometry.pdf(obs_pos_arr))
 
+
+    # If model includes radial velocities
+    if RV_obs is not None:
+
+        # Model parameters for RV do not include proper motions
+        p_RV = sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance
+
+        # Iterate through RV observations
+        for i, t in enumerate(t_obs_RV):
+
+            # Calculate the model RVs
+            RV_model = orbit.get_RV(p_RV, t)
+
+            # Include the updated radial velocity observations
+            ln_likelihood += -(RV_model - RV_obs[i])**2 / (2.0*RV_err**2)
+
+
     # Include limits on the photometry
     if G_mag_obs is not None:
 
@@ -86,6 +110,7 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G
 
         # Adjust the log of the likelihood based on photometry
         ln_likelihood += -(G_mag_obs - G_mag_model)**2/(2.0*G_mag_err**2)
+
 
     return ln_likelihood
 
@@ -117,7 +142,7 @@ def get_ln_prior(p):
     if I < 0.0 or I > np.pi: return -np.inf
     if tau < 2451545.*c.secday or tau > 2471545.*c.secday: return -np.inf
     if e < 0. or e >= 1.0: return -np.inf
-    if P < 0.0 or P > 2.0e4*c.secday: return -np.inf
+    if P < 0.0 or P > 2.0e6*c.secday: return -np.inf
     if M1 < 0.0 or M1 > 20.0*c.Msun: return -np.inf
     if M2 < 0.0 or M2 > 20.0*c.Msun: return -np.inf
     if distance < 0.0 or distance > 20000.0: return -np.inf
@@ -171,7 +196,7 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_
 
     # Natural log of the prior
     ln_prior = get_ln_prior(p)
-    if np.isinf(lp): return -np.inf
+    if np.isinf(ln_prior): return -np.inf
 
     # We don't model the radial velocity zero point, but its required by the functions
     gamma = 0.0 # Holder variable - not a useful parameter
@@ -179,7 +204,117 @@ def get_ln_posterior(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_
 
     # Natural log of the likelihood
     ln_likelihood = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err)
-    if np.isnan(ll): return -np.inf
+    if np.isnan(ln_likelihood): return -np.inf
+
+    # Return the natural log of the posterior function
+    return ln_prior + ln_likelihood
+
+
+
+
+
+
+
+
+
+
+def get_ln_prior_RV(p):
+    """ Calculate the prior probability of a set of model parameters
+
+    Arguments
+    ---------
+    p : tuple
+        Model parameters
+
+    Returns
+    -------
+    ln_prior : float
+        Natural log of the prior probabilty for the set of model parameters
+    """
+
+    # Load the set of model parameters
+    sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
+
+    ln_prior = 0.0
+
+    # Limit the range of model parameters
+    if sys_ra < 0.0 or sys_ra > 360.0: return -np.inf
+    if sys_dec < -90.0 or sys_dec > 90.0: return -np.inf
+    if Omega < 0.0 or Omega > 2.0*np.pi: return -np.inf
+    if omega < 0.0 or omega > np.pi: return -np.inf
+    if I < 0.0 or I > np.pi: return -np.inf
+    if tau < 2451545.*c.secday or tau > 2471545.*c.secday: return -np.inf
+    if e < 0. or e >= 1.0: return -np.inf
+    if P < 0.0 or P > 2.0e4*c.secday: return -np.inf
+    if gamma < -1000.0 or gamma > 1000.0: return -np.inf
+    if M1 < 0.0 or M1 > 20.0*c.Msun: return -np.inf
+    if M2 < 0.0 or M2 > 20.0*c.Msun: return -np.inf
+    if distance < 0.0 or distance > 20000.0: return -np.inf
+    if pm_ra < -1.0e4 or pm_ra > 1.0e4: return -np.inf
+    if pm_dec < -1.0e4 or pm_dec > 1.0e4: return -np.inf
+
+    # Log flat priors on mass
+    ln_prior -= np.log(M1/c.Msun)
+    ln_prior -= np.log(M2/c.Msun)
+
+    # Prior on inclination angle
+    ln_prior += np.log(np.sin(I)/2.0)
+
+    # Distance prior Lutz-Kelker bias
+    distance_max = 20.0e3  # Maximum distance of 20 kpc
+    ln_prior += np.log(3.0 * distance**2 / distance_max**3)
+
+    return ln_prior
+
+
+
+
+def get_ln_posterior_RV(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
+                        t_obs_RV=None, RV_obs=None, RV_err=None):
+    """ Calculate the posterior probability of a set of model parameters
+
+    Arguments
+    ---------
+    p : tuple
+        Set of model parameters
+    ra_obs : nd_array
+        Set of positions in right ascension (deg)
+    dec_obs : nd_array
+        Set of positions in declination (deg)
+    t_obs : nd_array
+        Set of observation times (Julian Days)
+    obs_angle : nd_array
+        Set of position angles that Gaia rotates on the sky (rad)
+    AL_err : float
+        Along-scan error (mas)
+    G_mag_obs : float
+        Gaia G band magnitude
+    G_mag_err : float
+        Gaia G band magnitude error
+    t_obs_RV : nd_array
+        Set of observation times for RVs (Julian Days)
+    RV_obs : nd_array
+        Set of radial velocity observations (km/s)
+    RV_err : float
+        Radial velocity measurement error (km/s)
+
+    Returns
+    -------
+    ln_posterior : float
+        Natural log of the posterior probability
+    """
+
+    # Load set of model parameters
+    sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
+
+    # Natural log of the prior
+    ln_prior = get_ln_prior_RV(p)
+    if np.isinf(ln_prior): return -np.inf
+
+    # Natural log of the likelihood
+    ln_likelihood = get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
+                                      t_obs_RV=t_obs_RV, RV_obs=RV_obs, RV_err=RV_err)
+    if np.isnan(ln_likelihood): return -np.inf
 
     # Return the natural log of the posterior function
     return ln_prior + ln_likelihood

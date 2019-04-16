@@ -117,7 +117,7 @@ def run_one_M2(P_orb=100.0, M2=1.0e-3, nburn=1000, nrun=5000):
 
 
 
-def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_photo=True):
+def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_photo=True, include_RV=False, t_obs_filename="../data/cadence/J1102.csv"):
     """
     Run sampler on one binary
 
@@ -133,6 +133,8 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
         Number of steps in burn-in and run
     include_M2_photo : bool
         Add photometric constraints to likelihood
+    include_RV : bool
+        Add radial velocity constraints to likelihood
 
     Returns
     -------
@@ -141,7 +143,7 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     """
 
     # Load Gaia observation times and angles
-    data = load_t_obs()
+    data = load_t_obs(filename=t_obs_filename)
     t_obs = data['ObservationTimeAtBarycentreBarycentricJulianDateInTCB']
     obs_angle = data['scanAnglerad']
 
@@ -170,11 +172,21 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     # Include photometric constraints?
     if not include_M2_photo: G_mag_obs = None
 
+    # Include RV constraints
+    if not include_RV:
+        t_obs_RV = None
+        RV_obs = None
+        RV_err = None
+    else:
+        t_obs_RV = data['ObservationTimeAtBarycentreBarycentricJulianDateInTCB'][data['CcdRow17'] <= 4] # RV obs only on CCDs 1-4
+        RV_obs, RV_err = get_RV_obs(p, t_obs_RV, RV_err=1.0)
+
     # Calculate observed positions
     ra_obs, dec_obs = get_pos_obs(p, t_obs, obs_angle, AL_err)
 
     # Initialize walkers using start position
-    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err, nwalkers=128)
+    sampler, p0 = initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
+                                     nwalkers=128, include_RV=include_RV, t_obs_RV=t_obs_RV, RV_obs=RV_obs, RV_err=RV_err)
 
     # Run sampler
     sampler = run_emcee(sampler, p0, nburn=nburn, nrun=nrun)
@@ -183,7 +195,8 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
 
 
 
-def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err, nwalkers=128):
+def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err,
+                       nwalkers=128, include_RV=False, t_obs_RV=None, RV_obs=None, RV_err=None):
     """
     Initialize walkers in an n-ball around set of model parameters and emcee sampler
 
@@ -215,11 +228,21 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, 
     # Load model parameters
     sys_ra, sys_dec, Omega, omega, I, tau, e, P, gamma, M1, M2, distance, pm_ra, pm_dec = p
 
+    # Vary probabilities depending radial velocities
+    if include_RV:
+        dim = 14
+        func_posterior = prob.get_ln_posterior_RV
+        args = (ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err, t_obs_RV, RV_obs, RV_err)
+    else:
+        dim = 13
+        func_posterior = prob.get_ln_posterior
+        args = (ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err)
+
     # Define sampler
     sampler = emcee.EnsembleSampler(nwalkers=nwalkers,
-                                    dim=13,
-                                    lnpostfn=prob.get_ln_posterior,
-                                    args=(ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G_mag_err))
+                                    dim=dim,
+                                    lnpostfn=func_posterior,
+                                    args=args)
 
     # Initialize walkers
     sys_ra_set = sys_ra + 1.0e-10*np.random.normal(size=nwalkers)
@@ -230,6 +253,7 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, 
     tau_set = tau + 1.0e3*np.random.normal(size=nwalkers)
     e_set = e + 1.0e-6*np.random.normal(size=nwalkers)
     P_set = P * (1. + 1e-3*np.random.normal(size=nwalkers))
+    if include_RV: gamma_set = gamma + 1.0e-2*np.random.normal(size=nwalkers)
     M1_set = M1 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     M2_set = M2 * (1. + 1.0e-6*np.random.normal(size=nwalkers))
     distance_set = distance * (1. + 1.0e-6*np.random.normal(size=nwalkers))
@@ -237,19 +261,36 @@ def initialize_walkers(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, 
     pm_dec_set = pm_dec * (1. + 1.0e-6*np.random.normal(size=nwalkers))
 
     # Numpy array of walkers
-    p0 = np.array([sys_ra_set,
-                   sys_dec_set,
-                   Omega_set,
-                   omega_set,
-                   I_set,
-                   tau_set,
-                   e_set,
-                   P_set,
-                   M1_set,
-                   M2_set,
-                   distance_set,
-                   pm_ra_set,
-                   pm_dec_set]).T
+    if include_RV:
+        p0 = np.array([sys_ra_set,
+                       sys_dec_set,
+                       Omega_set,
+                       omega_set,
+                       I_set,
+                       tau_set,
+                       e_set,
+                       P_set,
+                       gamma_set,
+                       M1_set,
+                       M2_set,
+                       distance_set,
+                       pm_ra_set,
+                       pm_dec_set]).T
+    else:
+        p0 = np.array([sys_ra_set,
+                       sys_dec_set,
+                       Omega_set,
+                       omega_set,
+                       I_set,
+                       tau_set,
+                       e_set,
+                       P_set,
+                       M1_set,
+                       M2_set,
+                       distance_set,
+                       pm_ra_set,
+                       pm_dec_set]).T
+
 
     return sampler, p0
 
@@ -312,6 +353,39 @@ def get_pos_obs(p, t_obs, obs_angle, AL_err):
     return ra_obs, dec_obs
 
 
+def get_RV_obs(p, t_obs_RV, RV_err=1.0):
+    """
+    Get RV samples
+
+    Arguments
+    ---------
+    p : tuple
+        Set of model parameters
+    t_obs_RV : nd_array
+        Set of radial velocity observation times
+    RV_err : float
+        Radial velocity error (km/s)
+
+    Returns
+    -------
+    RV_obs : nd_array
+        Array of radial velocities
+    RV_err : float
+        Radial velocity error
+    """
+
+    sys_ra, sys_dec, Omega, omega, I, tau, e, P_orb, gamma, M1, M2, distance, pm_ra, pm_dec = p
+    p_RV = sys_ra, sys_dec, Omega, omega, I, tau, e, P_orb, gamma, M1, M2, distance
+
+    # Calculate RVs
+    RV_obs = orbit.get_RV(p_RV, t_obs_RV*c.secday)
+
+    # Add measurement errors
+    RV_obs = RV_obs + np.random.normal(0.0, RV_err, len(t_obs_RV))
+
+    return RV_obs, RV_err
+
+
 def run_emcee(sampler, p0, nburn=100, nrun=1000):
     """
     Run the emcee sampler
@@ -341,7 +415,7 @@ def run_emcee(sampler, p0, nburn=100, nrun=1000):
 
 
 
-def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False):
+def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False, include_RV=False, t_obs_filename="../data/cadence/J1102.csv"):
     """
     Run a single binary
 
@@ -357,15 +431,20 @@ def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False):
         Number of burn-in and run steps
     include_M2_photo : bool
         Include photometric constraints
+    include_RV : bool
+        Include radial velocity constraints
+    t_obs_filename : string
+        Filename and path to observation time data
     """
 
     # Run a single binary
     sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
-                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo)
+                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=t_obs_filename)
 
     # Create the fileout string
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
     if include_M2_photo: fileout = fileout + '_photo'
+    if include_RV: fileout = fileout + '_RV'
 
     # Save sampler
     np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
@@ -379,8 +458,17 @@ M2 = float(sys.argv[3])
 P_orb = float(sys.argv[4])
 
 include_M2_photo = False
-if len(sys.argv) > 5: include_M2_photo=True
+if len(sys.argv) > 5:
+    if float(sys.argv[5]) == 1.0: include_M2_photo = True
+
+include_RV = False
+if len(sys.argv) > 6:
+    if float(sys.argv[6]) == 1.0: include_RV = True
+
+filename = "../data/cadence/J1102.csv"
+if len(sys.argv) > 7:
+    filename = sys.argv[7]
+
 
 # Run the binary
-# run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=False)
-run_only_one(dist, M1, M2, P_orb, 1000, 10000, include_M2_photo=include_M2_photo)
+run_only_one(dist, M1, M2, P_orb, 2, 10, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=filename)
