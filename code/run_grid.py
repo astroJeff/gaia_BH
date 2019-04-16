@@ -454,7 +454,7 @@ def run_only_one(dist, M1, M2, P_orb, nrun, include_M2_photo=False, include_RV=F
 
     # Run a single binary
     sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
-                             nburn=nburn, nrun=nrun, include_M2_photo=include_M2_photo,
+                             nrun=nrun, include_M2_photo=include_M2_photo,
                              include_RV=include_RV, t_obs_filename=t_obs_filename, fileout=fileout)
 
     # # Save sampler
