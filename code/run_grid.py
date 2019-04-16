@@ -445,7 +445,6 @@ def run_only_one(dist, M1, M2, P_orb, nburn, nrun, include_M2_photo=False, inclu
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
     if include_M2_photo: fileout = fileout + '_photo'
     if include_RV: fileout = fileout + '_RV'
-    if '10yr' in t_obs_filename: fileout = fileout + '_10yr'
 
     # Save sampler
     np.save(fileout + "_chains.npy", sampler.chain[:,::100,:])
@@ -472,4 +471,4 @@ if len(sys.argv) > 7:
 
 
 # Run the binary
-run_only_one(dist, M1, M2, P_orb, 2, 40000, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=filename)
+run_only_one(dist, M1, M2, P_orb, 2, 10, include_M2_photo=include_M2_photo, include_RV=include_RV, t_obs_filename=filename)

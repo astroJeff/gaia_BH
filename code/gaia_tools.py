@@ -11,33 +11,34 @@ AC_err = 612.45  # Across scan error in mas
 
 def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
-    """ A tool to determine the single observation astrometric precision. This is
+    """
+    A tool to determine the single observation astrometric precision. This is
     calculated in a bit of an ad hoc way. We call the overall parallax precision, then
     multiply by sqrt(N_obs), as this is the number that should have been used to determine
     the parallax precision. NOTE: this uses the Gaia DPAC package: pyGaia
 
-    Inputs
-    ------
+    Arguments
+    ---------
     G or V : float (provide one of these)
-    Gaia G-band or Visual V-band magnitude of the star
+        Gaia G-band or Visual V-band magnitude of the star
 
     V_IC : float
-    Color index of the stellar type
+        Color index of the stellar type
 
     RA : float
-    Right ascension in degrees
+        Right ascension in degrees
 
     Dec: float
-    Declination in degrees
+        Declination in degrees
 
     Returns
     -------
     plx_err_single : float
-    parallax uncertainty in arcseconds for a single observation
+        parallax uncertainty in arcseconds for a single observation
 
     """
 
-
+    # Ensure inputs are provided
     if V_IC is None:
         print("You must provide a color index in the form of V_IC.")
         return
@@ -62,16 +63,19 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
     else:
         coords = SkyCoord(ra=RA*u.deg, dec=Dec*u.deg, distance=DIST*u.pc, frame='icrs')
 
+    # We want the ecliptic latitute
     ecl_lat = coords.heliocentrictrueecliptic.lat.deg
 
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
 
+    # Obtain the parallax error
     plx_err = plxErr(G=G, vmini=V_IC, beta=ecl_lat)*1.0e-6
 
     m = 1.2
     g_pi = 1.92
 
+    # Use equations in Gaia document to calculate the single position error
     pos_err_single = np.sqrt(N_obs_ave) / (m * g_pi) * plx_err
 
     return pos_err_single
@@ -79,34 +83,33 @@ def get_single_obs_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=No
 
 def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
                            XGX=None, YGX=None, ZGX=None):
+    """
+    A tool to determine the parallax uncertainty for a star
 
-    """ A tool to determine the parallax uncertainty for a star
-
-    Inputs
-    ------
+    Arguments
+    ---------
     G or V : float (provide one of these)
-    Gaia G-band or Visual V-band magnitude of the star
+        Gaia G-band or Visual V-band of the star (magnitude)
 
     V_IC : float
-    Color index of the stellar type
+        Color index of the stellar type
 
     RA : float
-    Right ascension in degrees
+        Right ascension (degrees)
 
     Dec: float
-    Declination in degrees
+        Declination (degrees)
 
     DIST : float
-    Distance in parsecs
+        Distance (pc)
 
     Returns
     -------
     plx_err : float
-    parallax uncertainty in arcseconds
-
+        parallax uncertainty in (arcseconds)
     """
 
-
+    # Ensure inputs are provided
     if V_IC is None:
         print("You must provide a color index in the form of V_IC.")
         return
@@ -115,6 +118,7 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
         print("You must provide at least one color: G or V")
         return
 
+    # Calculate Gaia G from V
     if G is None:  G = V - 0.0257 - 0.0924 * (V_IC) - 0.1623 * (V_IC)**2 + 0.0090 * (V_IC)**3
 
     if RA is None and Dec is None:
@@ -133,38 +137,40 @@ def get_plx_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None,
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
 
+    # Get parallax error from pygaia
     plx_err = plxErr(G=G, vmini=V_IC, beta=ecl_lat)*1.0e-6
 
     return plx_err
 
 
 def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
-    """ A tool to determine the parallax uncertainty for a star
+    """
+    A tool to determine the parallax uncertainty for a star
 
-    Inputs
-    ------
+    Arguments
+    ---------
     G or V : float (provide one of these)
-    Gaia G-band or Visual V-band magnitude of the star
+        Gaia G-band or Visual V-band of the star (mag)
 
     V_IC : float
-    Color index of the stellar type
+        Color index of the stellar type
 
     RA : float
-    Right ascension in degrees
+        Right ascension (deg)
 
     Dec : float
-    Declination in degrees
+        Declination (deg)
 
     DIST : float
-    Distance in parsecs
+        Distance (pc)
 
     Returns
     -------
     pos_err : float
-    position uncertainty in arcseconds
-
+        position uncertainty (arcseconds)
     """
 
+    # Ensure inputs are provided
     if V_IC is None:
         print("You must provide a color index in the form of V_IC.")
         return
@@ -173,6 +179,7 @@ def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
         print("You must provide at least one color: G or V")
         return
 
+    # Calculate Gaia G from V
     if G is None:  G = V - 0.0257 - 0.0924 * (V_IC) - 0.1623 * (V_IC)**2 + 0.0090 * (V_IC)**3
 
     if RA is None and Dec is None:
@@ -190,6 +197,7 @@ def get_pos_err(G=None, V=None, V_IC=None, RA=None, Dec=None, DIST=None):
     # KMB: compute average N_obs for given ecliptic latitude
     N_obs_ave = N_transit_ave(ecl_lat)
 
+    # Get position error from pygaia
     pos_err = posErr(G=G, vmini=V_IC, beta=ecl_lat)*1.0e-6
 
     return pos_err
@@ -199,24 +207,24 @@ def calc_new_magnitude(mag_current, distance_current, distance_new):
     """
     Calculate the magnitude of a star if its distance were shifted forward or backward
 
-    Inputs
-    ------
+    Arguments
+    ---------
     mag_current : float
-    Current magnitude of the stellar
+        Current magnitude of the stellar
 
     distance_current : float
-    Current distance to the star (pc)
+        Current distance to the star (pc)
 
     distance_new : float
-    New distance to the stellar (pc)
+        New distance to the stellar (pc)
 
     Returns
     -------
     mag_new : float
-    Magnitude of the star at the new distance
-
+        Magnitude of the star at the new distance
     """
 
+    # Calculate the apparent magnitude of a star given another reference star
     mag_new = mag_current + 5.0 * (np.log10(distance_new/10.0) - np.log10(distance_current/10.0))
 
     return mag_new
