@@ -419,7 +419,7 @@ def run_emcee(sampler, p0, nrun=1000):
 
     pos,prob,state = sampler.run_mcmc(p0, N=nrun)
 
-    return sampler, prob
+    return sampler, pos
 
 
 
