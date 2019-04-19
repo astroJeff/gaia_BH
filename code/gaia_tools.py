@@ -14,7 +14,7 @@ AL_scan_precision = None
 
 
 
-def load_interpolatio_data():
+def load_interpolation_data():
     """
     Function to load the interpolation function for the AL astrometric precision as a function of Gaia g mag.
     """
@@ -45,7 +45,7 @@ def get_single_obs_pos_err_limit(g_mag):
 
     global AL_scan_precision
 
-    if AL_scan_precision is None: load_interpolatio_data()
+    if AL_scan_precision is None: load_interpolation_data()
 
     return AL_scan_precision(g_mag)
 
