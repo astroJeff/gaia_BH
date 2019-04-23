@@ -96,11 +96,10 @@ def get_ln_likelihood(p, ra_obs, dec_obs, t_obs, obs_angle, AL_err, G_mag_obs, G
         for i, t in enumerate(t_obs_RV):
 
             # Calculate the model RVs
-            RV_model = orbit.get_RV(p_RV, t)
+            RV_model = orbit.get_RV(p_RV, t*c.secday)
 
             # Include the updated radial velocity observations
             ln_likelihood += -(RV_model - RV_obs[i])**2 / (2.0*RV_err**2)
-
 
     # Include limits on the photometry
     if G_mag_obs is not None:
