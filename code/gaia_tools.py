@@ -26,6 +26,34 @@ def load_interpolation_data():
     # Data is in mas, interpolation should be in asec
     AL_scan_precision = interp1d(data[:,0], data[:,1]/1.0e3)
 
+def get_single_obs_pos_err_estimate(g_mag):
+    """
+    Use the estimates from Holl et al. (in prep) to estimate the single position error.
+
+    Arguments
+    ---------
+    g_mag : float
+        Gaia g magnitude
+
+    Returns
+    -------
+    AL_scan_precision : float
+        Angular precision on the position of a star of a given magnitude (in asec)
+
+    """
+
+    c1 = 49000.0
+    c2 = 1700.0
+
+    sigma_att_2 = 20.0*20.0
+    sigma_cal_2 = 20.0*20.0
+
+    z = np.sqrt(10**(0.8*(np.max([g_mag, 12.0])-15.0)))
+    sigma_eta_2 = c1*z + c2*z*z
+
+    sigma_fov = np.sqrt(sigma_eta_2/9.0 + sigma_att_2 + sigma_cal_2)
+    return sigma_fov / 1.0e6
+
 
 def get_single_obs_pos_err_limit(g_mag):
     """

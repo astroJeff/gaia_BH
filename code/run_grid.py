@@ -167,7 +167,8 @@ def run_one_binary(distance, M1, M2, P_orb, nburn=1000, nrun=5000, include_M2_ph
     G_mag_err = gaia_photometric.gMagnitudeErrorEoM(G_mag_obs, nobs=len(t_obs))
 
     # Calculate Gaia along-scan pointing precision
-    AL_err = gaia.get_single_obs_pos_err_limit(g_mag=G_mag_obs)
+    AL_err = gaia.get_single_obs_pos_err_estimate(g_mag=G_mag_obs)
+    # AL_err = gaia.get_single_obs_pos_err_limit(g_mag=G_mag_obs)
     # AL_err = gaia.get_single_obs_pos_err(G=G_mag_obs, V_IC=V_IC, RA=165.5728333, Dec=41.2209444, DIST=distance)
     AL_err *= 1.0e3  # in mas, not asec
 
