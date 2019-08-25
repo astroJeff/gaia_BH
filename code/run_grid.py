@@ -452,6 +452,8 @@ def run_only_one(dist, M1, M2, P_orb, nrun, include_M2_photo=False, include_RV=F
     fileout = "../data/M1_" + str(int(M1)) + '_M2_%.3f'%M2 + '_dist_' + str(int(dist)) + '_Porb_%.3f'%P_orb
     if include_M2_photo: fileout = fileout + '_photo'
     if include_RV: fileout = fileout + '_RV'
+    if "_10yr.csv" in t_obs_filename: fileout = fileout + '_10yr'
+
 
     # Run a single binary
     sampler = run_one_binary(dist, M1*c.Msun, M2*c.Msun, P_orb*c.secday,
